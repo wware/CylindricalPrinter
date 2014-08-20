@@ -1,0 +1,8 @@
+.DS_Store
+venv/
+bin/
+static/
+*.db
+*.pyc
+*.sqlite
+gear1*.scad

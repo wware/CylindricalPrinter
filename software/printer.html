@@ -1,0 +1,106 @@
+<html>
+    <head>
+        <meta http-equiv="refresh" content="300">
+        <style>
+            button { padding: 2px; width: 120px; height: 60px; font-size: 120%; }
+            div.flow { padding: 2px; display:inline-block; }
+            img { padding: 2px; }
+            td { vertical-align: top; }
+            td.pic { text-align: center; }
+            #shutdown { background-color: #f88; }
+            #print { background-color: #cfc; }
+            #print:disabled { background-color: #ccc }
+            button:disabled { background-color: #ccc }
+            #pics li { display:inline-block; }
+        </style>
+        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js">
+        </script>
+        <script type="text/javascript">
+            $(function() {
+                $("#print").click(function() {
+                    var chosen = $('input[name=model]:checked').val();
+                    $.ajax("/_print?filename=" + chosen).then(function(ignored) {
+                        location.reload();
+                    });
+                });
+                $("#shutdown").click(function() {
+                    $.ajax('/shutdown');
+                });
+                $("#file").change(function() {
+                    console.log($("#file"));
+                });
+            });
+        </script>
+    </head>
+    <body>
+        <h1>Printer controls and status</h1>
+        <table>
+            <tr>
+                <td>
+                    <button id="shutdown">Shutdown</button>
+                </td>
+                <td>
+                    <button id="print"
+                            {% if chosenModel != none %}disabled{% endif %}>
+                    Print
+                    </button>
+                </td>
+                <td>
+                    <button onmousedown="$.ajax('/motorUp')"
+                            onmouseup="$.ajax('/motorStop')"
+                            {% if chosenModel != none %}disabled{% endif %}>
+                    Up
+                    </button>
+                </td>
+                <td>
+                    <button onmousedown="$.ajax('/motorDown')"
+                            onmouseup="$.ajax('/motorStop')"
+                            {% if chosenModel != none %}disabled{% endif %}>
+                    Down
+                    </button>
+                </td>
+            </tr>
+            <tr>
+                <td style="border: 1px solid #ccc;">
+                    <b>Models</b><br/>
+                    {% for model in models %}
+                        <input type="radio" name="model"
+                            {% if model == chosenModel %}checked{% endif %}
+                            value="{{ model }}">{{ model }}<br/>
+                    {% endfor %}
+                </td>
+                <td style="border: 1px solid #ccc;">
+                    <b>STL units</b><br/>
+                    X: {{ bbox_min.x|round(3) }} to {{ bbox_max.x|round(3) }}<br/>
+                    Y: {{ bbox_min.y|round(3) }} to {{ bbox_max.y|round(3) }}<br/>
+                    Z: {{ bbox_min.z|round(3) }} to {{ bbox_max.z|round(3) }}<br/>
+                    Current Z: {{ currentz|round(3) }}
+                </td>
+                <td colspan="2" style="border: 1px solid #ccc;">
+                    <b>Upload a STL model</b><br/>
+                    <input type="file" id="file" onchange="upload_file()">
+                </td>
+            </tr>
+        </table>
+        <ul id="pics">
+        {% for slice in slices %}
+            <li>
+                <table>
+                    <tr>
+                        <td>
+                            <a href="/static/{{slice.filename}}"><img
+                                src="/static/{{slice.thumbnail}}"></a>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="pic">
+                            <span>z = {{ slice.z|round(3) }}</span>
+                        </td>
+                    </tr>
+                </table>
+            </li>
+        {% endfor %}
+        </ul>
+    </body>
+</html>
