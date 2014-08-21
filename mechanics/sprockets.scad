@@ -41,21 +41,28 @@ module sprocket(teeth, hub_diameter) {
         rotate(theta*i, [0, 0, 1])
             translate([0, -r, 0]) sprocket_tooth();
     translate([0,0,-1/16])
-        cylinder(h=1/8, d=2*r-0.5, $fn=20);
+        cylinder(h=1/8, d=2*r-0.5, $fn=30);
     translate([0,0,-3/16])
-        cylinder(h=3/8, d=hub_diameter, $fn=20);
+        cylinder(h=3/8, d=hub_diameter, $fn=30);
 }
 
 module StepperSprocket(teeth, axle_diameter) {
-    dcut = 0.5 * (0.22/0.250) * axle_diameter;
+    dcut = 0.5 * (0.21/0.250) * axle_diameter;
     difference() {
-        sprocket(teeth, 0.5);
+        union() {
+            sprocket(teeth, 0.5);
+            translate([0, 0, -5/16])
+                cylinder(h=5/16, d=0.5, $fn=30);
+        }
         difference() {
             translate([0,0,-0.5])
-                cylinder(h=1, r=axle_diameter/2, $fn=40);
+                cylinder(h=1, r=axle_diameter/2, $fn=30);
             translate([dcut, -0.5, -0.5])
                 cube([1, 1, 1]);
         }
+        translate([0, 0, -3/16])
+            rotate([0, 90, 0])
+                cylinder(h=1, d=3/32, $fn=30);
     }
 }
 
@@ -78,7 +85,7 @@ wrench_size = 0.43;
  */
 
 scale([25.4, 25.4, 25.4]) {
-    // StepperSprocket(teeth, 1/4);
+    StepperSprocket(teeth, 1/4);
 
-    HexNutSprocket(teeth, wrench_size);
+    // HexNutSprocket(teeth, wrench_size);
 }
