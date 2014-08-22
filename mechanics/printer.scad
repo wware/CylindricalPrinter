@@ -53,7 +53,7 @@ scale([25.4, 25.4, 25.4]) {
     home_depot_bucket();
 
     /* mirror and supports */
-    translate([1, 6.5, 0])
+    translate([1, 4.5, 0])
         ThreadedRod(6);
     translate([1, -6.5, 0])
         ThreadedRod(6);
