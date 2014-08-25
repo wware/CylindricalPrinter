@@ -53,11 +53,9 @@ scale([25.4, 25.4, 25.4]) {
     home_depot_bucket();
 
     /* mirror and supports */
-    translate([1, 4.5, 0])
+    translate([0, 6.5, 0])
         ThreadedRod(6);
     translate([1, -6.5, 0])
-        ThreadedRod(6);
-    translate([-1, 6.5, 0])
         ThreadedRod(6);
     translate([-1, -6.5, 0])
         ThreadedRod(6);
@@ -72,17 +70,17 @@ scale([25.4, 25.4, 25.4]) {
         rotate([0, -90, 0])
         Prism45();
 
-    /* lower support */
+    /* main support */
     difference() {
         union() {
             translate([0, 0, 0])
                     cylinder(d=15, h=1/4, $fn=60);
             rotate([0, 0, 60])
-                translate([7, -2.5, 0])
-                    cube([2.5, 1, 1/4]);
+                translate([6.5, -3, 0])
+                    cube([4.5, 1.5, 1/4]);
             rotate([0, 0, 60])
-                translate([7, 1.5, 0])
-                    cube([2.5, 1, 1/4]);
+                translate([6.5, 1.5, 0])
+                    cube([4.5, 1.5, 1/4]);
         }
         translate([0, 0, -1/2])
             cylinder(h=2, d=8, $fn=60);
@@ -92,14 +90,37 @@ scale([25.4, 25.4, 25.4]) {
             translate([6, -1.5, -1])
                 cube([1, 3, 1]);
 
+    /* cover plate */
+    difference() {
+        union() {
+            translate([0, 0, 5/8])
+                cylinder(d=10, h=1/4, $fn=60);
+            for (i = [0 : 2])
+                rotate([0, 0, 120*i])
+                    translate([4.5, -0.5, 5/8])
+                        difference() {
+                            cube([2, 1, 1/4]);
+                            translate([1.5, 0.5, 0])
+                                ThreadedRod(2);
+                        }
+        }
+        union() {
+            cylinder(h=2, d=8, $fn=60);
+            for (i = [0 : 2])
+                rotate([0, 0, 120*i])
+                    translate([4.5, 0, 0])
+                        ThreadedRod(2);
+        }
+    }
+
     /* stepper and stepper sprocket */
     rotate([0, 0, 60]) {
-        translate([8, 0, 7/16])
+        translate([9.5, 0, 7/16])
             StepperSprocket(teeth, 1/4);
-        translate([8, 0, -1/4])
+        translate([9.5, 0, -1/4])
             CrudeNEMA23();
-        translate([6.5, -2.5, -1/4])
-            cube([3, 5, 1/4]);
+        translate([8, -3, -1/4])
+            cube([3, 6, 1/4]);
     }
 
     /* hex nut sprockets */
