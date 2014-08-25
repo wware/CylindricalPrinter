@@ -74,6 +74,11 @@ module HexNutSprocket(teeth, wrench_size) {
                 translate([-0.5 * wrench_size, -0.5, -0.5])
                     cube([wrench_size, 1, 1]);
     }
+    difference() {
+        translate([0, 0, 1/32])
+            cylinder(h=5/32, d=0.75, $fn=30);
+        cylinder(h=1, d=0.3, $fn=30);
+    }
 }
 
 teeth = 8;
@@ -85,7 +90,7 @@ wrench_size = 0.43;
  */
 
 scale([25.4, 25.4, 25.4]) {
-    StepperSprocket(teeth, 1/4);
+    // StepperSprocket(teeth, 1/4);
 
-    // HexNutSprocket(teeth, wrench_size);
+    HexNutSprocket(teeth, wrench_size);
 }
