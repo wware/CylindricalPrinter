@@ -1,0 +1,217 @@
+%!PS
+%% General Postscript info:
+%%    http://www-cdf.fnal.gov/offline/PostScript/BLUEBOOK.PDF
+%%
+%% Type:
+%%    ps2pdf template.ps template.pdf
+%% then print out pattern.pdf, remembering to enlarge it by a
+%% factor of three. The PDF here is reduced to fit on a
+%% letter-size sheet. Use a center punch or an awl to copy the
+%% pattern onto the plywood.
+
+% normally 72 dpi, but reduced by a factor of three
+/SCALE 0.33333333 def 
+
+/inch {
+    72 SCALE mul mul
+} def
+
+/RLT { rlineto } def
+/LT { lineto } def
+/MT { moveto } def
+/S { stroke } def
+
+/pstack { () = /TopOfStack = stack /EndStack = () = } def
+
+%% Postscript doesn't have a native arcsin function, but Don
+%% Lancaster wrote one:
+%% http://www.tinaja.com/glib/pssecrets.pdf number 6
+/arcsin {
+    /hypot exch def
+    /opposite exch def
+    % adjacent = (hypot**2 - opposite**2) ** 0.5
+    hypot dup mul opposite dup mul sub sqrt
+    % atan(opposite / adjacent)
+    opposite exch atan
+} def
+
+% Draw everything relative to XC (x center) and YC (y center), so it's easy
+% to move things around for the different pages.
+
+/point {   % x y ->
+    /y exch def
+    /x exch def
+    x y 0.125 inch add MT
+    x y 0.125 inch sub LT S
+    x 0.125 inch add y MT
+    x 0.125 inch sub y LT S
+} def
+
+/rectangle {   % x1 y1 x2 y2 ->
+    /y2 exch def
+    /x2 exch def
+    /y1 exch def
+    /x1 exch def
+    x1 y1 MT x1 y2 LT x2 y2 LT x2 y1 LT x1 y1 LT S
+} def
+
+/RC {   % rotate around center: x y theta -> x' y'
+    dup cos /costheta exch def
+    sin /sintheta exch def
+    YC sub /y exch def
+    XC sub /x exch def
+    x costheta mul y sintheta mul sub XC add
+    x sintheta mul y costheta mul add YC add
+} def
+
+% inner radius of the main support
+/innerR 4   inch def
+
+% radius of the three threaded rods that raise/lower the build platform
+/R      4.5 inch def
+
+% radius of the build platform, and outer radius of the cover plate
+/BPR    5 inch def
+
+% radius of the nuts & bolts that hold up the cover plate
+/R2     6   inch def
+
+% outer radius of the main support
+/outerR 7.5 inch def
+
+/onepage {
+    % arrow pointing at the projector, to stay oriented
+    XC 1 inch sub YC 0.25 inch add  MT
+    /Times-Roman findfont 24 SCALE mul scalefont setfont (Projector) show
+    XC 3 inch sub YC  MT
+    XC 3 inch add YC  LT
+    -1 inch -0.5 inch RLT
+    1  inch  0.5 inch RLT
+    -1 inch  0.5 inch RLT
+
+    XC R add YC   60 RC point
+    XC R add YC  180 RC point
+    XC R add YC  300 RC point
+    XC R2 add YC   60 RC point
+    XC R2 add YC  180 RC point
+    XC R2 add YC  300 RC point
+
+    % main support, inner radius
+    XC YC innerR 0 360 arc S
+
+    % main support, mirror mount holes
+    XC -1 inch add YC 6.5 inch add point
+    XC 1  inch add YC 6.5 inch add point
+    XC             YC 6.5 inch sub point
+
+    % build plate
+    XC YC BPR 0 360 arc S
+
+    % cover plate, we've already drawn the circular portion
+    /y1 0.5 inch def
+    /theta1 y1 BPR arcsin def
+    /outriggerX 6.5 inch def
+    /outrigger {
+        /theta exch def
+        XC BPR theta1 cos mul add YC 0.5 inch sub theta RC MT
+        XC outriggerX add YC 0.5 inch sub theta RC LT
+        XC outriggerX add YC 0.5 inch add theta RC LT
+        XC BPR theta1 cos mul add YC 0.5 inch add theta RC LT S
+    } def
+    60 outrigger
+    180 outrigger
+    300 outrigger
+
+    % main support, outline
+    /y1 1.5 inch def
+    /y2 3 inch def
+    /theta1 y1 outerR arcsin def
+    /theta2 y2 outerR arcsin def
+    /outriggerX 11 inch def
+    XC YC outerR 0 240 theta2 sub arc
+    XC outriggerX add YC y2 sub 240 RC LT
+    XC outriggerX add YC y1 sub 240 RC LT
+    XC YC outerR 240 theta1 sub 240 theta1 add arc
+    XC outriggerX add YC y1 add 240 RC LT
+    XC outriggerX add YC y2 add 240 RC LT
+    XC YC outerR 240 theta2 add 360 arc S
+
+    XC outriggerX add 1.5 inch sub YC 2.25 inch sub 240 RC point
+    XC outriggerX add 1.5 inch sub YC 2.25 inch sub 240 RC
+    2 copy 4.375 inch 315 345 arc
+    2 copy 4.625 inch 345 315 arcn
+    2 copy 4.375 inch 315 345 arc stroke
+
+    %% stepper plate
+    XC 11 inch add YC 7 inch add XC 14 inch add YC 1 inch add rectangle
+    XC 12.5 inch add YC 6.25 inch add point
+    XC 12.5 inch add YC 1.75 inch add point
+    XC 12.5 inch add YC 4 inch add point
+    XC 13.475 inch add YC 3.125 inch add point
+    XC 13.475 inch add YC 4.975 inch add point
+    XC 11.625 inch add YC 3.125 inch add point
+    XC 11.625 inch add YC 4.975 inch add point
+
+    %% mirror mount
+    XC 8 inch add YC 7 inch add XC 11 inch add YC 7 inch sub rectangle
+    XC 8.5  inch add YC 6.5 inch add point
+    XC 10.5 inch add YC 6.5 inch add point
+    XC 9.5  inch add YC 6.5 inch sub point
+} def
+
+/registrationMarks {
+    /RM {   % x y ->
+        /y exch def
+        /x exch def
+        /r 0.125 inch def
+        /d r 2 sqrt div def
+        x d sub y d sub MT x d add y d add LT S
+        x d sub y d add MT x d add y d sub LT S
+        x y r 0 360 arc S
+    } def
+    0.5 inch   0.5 inch   RM
+    0.5 inch   10.5 inch  RM
+    0.5 inch   20.5 inch  RM
+    0.5 inch   30.5 inch  RM
+    8 inch     0.5 inch   RM
+    8 inch     10.5 inch  RM
+    8 inch     20.5 inch  RM
+    8 inch     30.5 inch  RM
+    15.5 inch  0.5 inch   RM
+    15.5 inch  10.5 inch  RM
+    15.5 inch  20.5 inch  RM
+    15.5 inch  30.5 inch  RM
+} def
+
+/overlappingSeparatePages {
+    userdict /SCALE 1 put
+    /incr  { 1 index load add userdict 3 1 roll put } def
+    /XC  8.5   inch def
+    /YC  1.5 inch def
+    onepage registrationMarks showpage
+
+    /YC 10 inch incr
+    onepage registrationMarks showpage
+
+    /XC -7.5 inch incr
+    /YC -10 inch incr
+    onepage registrationMarks showpage
+
+    /YC 10 inch incr
+    onepage registrationMarks showpage
+
+    /XC -7.5 inch incr
+    /YC -10 inch incr
+    onepage registrationMarks showpage
+
+    /YC 10 inch incr
+    onepage registrationMarks showpage
+} def
+
+/singleBigSheet {
+    /XC  9.5 inch def
+    /YC  12  inch def
+    onepage showpage
+} def
+
+singleBigSheet
