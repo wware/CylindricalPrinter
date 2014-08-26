@@ -8,16 +8,22 @@ tolerances, hopefully none more exacting than 1/16", and most of them much
 less exacting. Wherever possible I've used the commonest, cheapest, most
 widely-available parts I could find.
 
+Just so you know what you're trying to build, here is a picture. The orange
+thing is a five-gallon bucket from Home Depot.
+
+![One picture of the printer](https://raw.githubusercontent.com/wware/CylindricalPrinter/master/mechanics/printer_1.png)
+
+![Another picture of the printer](https://raw.githubusercontent.com/wware/CylindricalPrinter/master/mechanics/printer_2.png)
+
 Sprockets and bike chain
 --
 
 The drive chain of the printer uses 1/2"-1/8" single-speed bicycle chain and
-four 3d-printed sprockets. To build this printer you will need these sprockets.
-If you have a friend with a 3d printer, they can print them for you. Otherwise
-you can go to a service bureau such as Shapeways or Sculpteo.
-
-Once your printer is built, you can print sprockets (and maybe other parts)
-for yourself and other people.
+four [3d-printed sprockets](http://www.thingiverse.com/thing:426854). To build
+this printer you will need these sprockets. If you have a friend with a 3d
+printer, they can print them for you. Otherwise you can go to a service bureau
+such as Shapeways or Sculpteo. Once your printer is built, you can print
+sprockets (and maybe other parts) for yourself and other people.
 
 Plywood pieces
 --
