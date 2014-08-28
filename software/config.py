@@ -6,7 +6,7 @@ import logging
 # * Port number, directories
 
 SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 8000
+SERVER_PORT = 80
 
 # When we use red, we can see the image on the resin but the resin
 # doesn't get cured. Helpful for alignment, focusing, calibration, etc.
