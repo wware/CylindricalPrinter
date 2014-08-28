@@ -15,6 +15,8 @@ thing is a five-gallon bucket from Home Depot.
 
 ![Another picture of the printer](https://raw.githubusercontent.com/wware/CylindricalPrinter/master/mechanics/printer_2.png)
 
+![A real picture of the printer](https://raw.githubusercontent.com/wware/CylindricalPrinter/master/mechanics/RealPrinterPhoto.png)
+
 Sprockets and bike chain
 --
 

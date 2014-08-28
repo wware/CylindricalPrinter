@@ -10,10 +10,14 @@
 %% pattern onto the plywood.
 
 % normally 72 dpi, but reduced by a factor of three
-/SCALE 0.33333333 def 
+/reducedBy 3 def
+
+/scale { 1 reducedBy div } def
+
+/Times-Roman findfont 36 scale mul scalefont setfont
 
 /inch {
-    72 SCALE mul mul
+    72 scale mul mul
 } def
 
 /RLT { rlineto } def
@@ -80,11 +84,17 @@
 /outerR 7.5 inch def
 
 /onepage {
+    reducedBy 1 ne {
+        1.5 inch 1.5 inch MT
+        (Enlarge by ) show
+        reducedBy (   ) cvs show
+        (X) show
+    } if
+
     % arrow pointing at the projector, to stay oriented
-    XC 1 inch sub YC 0.25 inch add  MT
-    /Times-Roman findfont 24 SCALE mul scalefont setfont (Projector) show
-    XC 3 inch sub YC  MT
-    XC 3 inch add YC  LT
+    XC 1 inch sub YC 0.25 inch add  MT  (Projector) show
+    XC 2 inch sub YC  MT
+    XC 2 inch add YC  LT
     -1 inch -0.5 inch RLT
     1  inch  0.5 inch RLT
     -1 inch  0.5 inch RLT
@@ -184,7 +194,7 @@
 } def
 
 /overlappingSeparatePages {
-    userdict /SCALE 1 put
+    userdict /reducedBy 1 put
     /incr  { 1 index load add userdict 3 1 roll put } def
     /XC  8.5   inch def
     /YC  1.5 inch def
