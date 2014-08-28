@@ -40,11 +40,11 @@ STEPPER = 'NullStepper'
 
 MOCK_ARDUINO = True
 
-# PROJECTOR = 'macbook.Projector'
+PROJECTOR = 'macbook.Projector'
 # STEPPER = 'macbook.Stepper'
 
 # PROJECTOR = 'rpi.Projector'
-# STEPPER = 'rpi.Stepper'
+STEPPER = 'rpi.Stepper'
 
 
 def get(attr, globals=globals()):

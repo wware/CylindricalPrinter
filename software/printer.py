@@ -22,6 +22,8 @@ _stepper = None
 
 env = Environment(loader=PackageLoader('printer', '.'))
 
+os.system('mkdir -p static')
+
 _slices = []
 
 
@@ -81,16 +83,19 @@ class Server(object):
 
     @cherrypy.expose
     def _motorUp(self):
+        logger.debug("motor up")
         _stepper.start(True)
         return 'ok\n'
 
     @cherrypy.expose
     def _motorDown(self):
+        logger.debug("motor down")
         _stepper.start(False)
         return 'ok\n'
 
     @cherrypy.expose
     def _motorStop(self):
+        logger.debug("motor stop")
         _stepper.stop()
         return 'ok\n'
 
@@ -187,4 +192,5 @@ if __name__ == "__main__":
     klass = config.lookup(globals(), config.STEPPER)
     if klass:
         _stepper = klass()
+    logger.debug("Stepper: {0}\nProjector: {1}".format(_stepper, _projector))
     server.start()

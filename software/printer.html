@@ -47,15 +47,15 @@
                     </button>
                 </td>
                 <td>
-                    <button onmousedown="$.ajax('/motorUp')"
-                            onmouseup="$.ajax('/motorStop')"
+                    <button onmousedown="$.ajax('/_motorUp')"
+                            onmouseup="$.ajax('/_motorStop')"
                             {% if chosenModel != none %}disabled{% endif %}>
                     Up
                     </button>
                 </td>
                 <td>
-                    <button onmousedown="$.ajax('/motorDown')"
-                            onmouseup="$.ajax('/motorStop')"
+                    <button onmousedown="$.ajax('/_motorDown')"
+                            onmouseup="$.ajax('/_motorStop')"
                             {% if chosenModel != none %}disabled{% endif %}>
                     Down
                     </button>
