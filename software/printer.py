@@ -77,8 +77,8 @@ class Server(object):
     def shutdown(self):
         _projector.shutdown()
         _stepper.shutdown()
-        os.system('sudo killall -KILL fbi')
-        os.system('sudo killall -KILL python')
+        os.system('killall -KILL fbi')
+        os.system('killall -KILL python')
         return 'bye\n'
 
     @cherrypy.expose

@@ -12,7 +12,7 @@ import RPi.GPIO as GPIO
 
 logger = config.get_logger('RPI')
 
-STEPPER_TIME = 0.01
+STEPPER_TIME = 0.001
 
 
 class Projector(NullProjector):
@@ -23,12 +23,12 @@ class Projector(NullProjector):
 
     def _go_dark(self):
         # project black, and kill any outstanding fbi processes
-        cmd = "sudo fbi -S -1 -T 1 -d /dev/fb0 black.png"
+        cmd = "fbi -S -1 -T 1 -d /dev/fb0 black.png"
         os.system(cmd)
-        os.system("sudo killall -KILL fbi")
+        os.system("killall -KILL fbi")
 
     def project(self, filename, milliseconds):
-        cmd = "sudo fbi -S -1 -T 1 -d /dev/fb0 {0}".format(
+        cmd = "fbi -S -1 -T 1 -d /dev/fb0 {0}".format(
             "static/" + filename
         )
         logger.debug(cmd)
@@ -58,7 +58,10 @@ class Stepper(NullStepper):
             if not _running:
                 _running = True
                 logger.debug("Stepper is starting")
-                while _running and _steps != 0:
+                while _running:
+                    if _steps == 0:
+                        _running = False
+                        return
                     GPIO.output(17, GPIO.HIGH)
                     time.sleep(STEPPER_TIME)
                     GPIO.output(17, GPIO.LOW)
