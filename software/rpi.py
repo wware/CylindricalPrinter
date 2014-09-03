@@ -8,7 +8,11 @@ import time
 import threading
 
 from printer import NullProjector, NullStepper
-import RPi.GPIO as GPIO
+
+try:
+    import RPi.GPIO as GPIO
+except:
+    import mock_rpi as GPIO
 
 logger = config.get_logger('RPI')
 
@@ -37,17 +41,21 @@ class Projector(NullProjector):
         self._go_dark()
 
 
-# http://elinux.org/RPi_Low-level_peripherals#Python
-# GPIO17 is the pulses input of the stepper controller
-# GPIO18 is the direction input
-GPIO.setmode(GPIO.BCM)
-GPIO.setup(17, GPIO.OUT)
-GPIO.setup(18, GPIO.OUT)
-
 _running = False
 _steps = 0
 
+
 class Stepper(NullStepper):
+
+    def __init__(self):
+        os.system('pip install RPi.GPIO')
+        import RPi.GPIO as GPIO
+        # http://elinux.org/RPi_Low-level_peripherals#Python
+        # GPIO17 is the pulses input of the stepper controller
+        # GPIO18 is the direction input
+        GPIO.setmode(GPIO.BCM)
+        GPIO.setup(17, GPIO.OUT)
+        GPIO.setup(18, GPIO.OUT)
 
     class StepperProgress(threading.Thread):
         def __init__(self):

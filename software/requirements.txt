@@ -14,4 +14,3 @@ pyflakes==0.8.1
 pyserial==2.7
 web.py==0.37
 wsgiref==0.1.2
-RPi.GPIO==0.5.5
