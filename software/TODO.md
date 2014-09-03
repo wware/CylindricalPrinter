@@ -12,42 +12,10 @@ First do this on the RPi
 
 ```bash
 sudo apt-get update
-sudo apt-get install -y git
+sudo apt-get install -y git vim python-dev python-virtualenv \
+    imagemagick build-essential
+git clone https://github.com/wware/CylindricalPrinter.git
+(cd fbida && make && sudo make install)
 git clone https://github.com/wware/CylindricalPrinter.git
 cd CylindricalPrinter/software
-```
-
-Then you can get to this file, where you can just copy and paste the rest.
-
-```bash
-sudo apt-get install -y vim python-dev python-virtualenv imagemagick build-essential
-
-sudo cat > /etc/networking/interfaces <<EOF
-auto lo
-iface lo inet loopback
-iface eth0 inet dhcp
-allow-hotplug wlan0
-iface wlan0 inet manual
-wpa-roam /etc/wpa_supplicant/wpa_supplicant.conf
-iface default inet dhcp
-EOF
-
-sudo cat > /etc/wpa_supplicant/wpa_supplicant.conf <<EOF
-ctrl_interface=DIR=/var/run/wpa_supplicant GROUP=netdev
-update_config=1
-network={
-    ssid="Linksys10206"
-    proto=RSN
-    key_mgmt=WPA-PSK
-    pairwise=CCMP TKIP
-    group=CCMP TKIP
-    psk="PASSWORD"
-}
-EOF
-```
-
-Replace "PASSWORD" withn the actual WPA password. Then type
-
-```bash
-sudo ifdown wlan0; sudo ifup wlan0
 ```
