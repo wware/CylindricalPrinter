@@ -6,15 +6,18 @@ import logging
 # * Port number, directories
 
 SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 80
+# You could set the port to 80, but then you need to sudo printer.py and you
+# leave junk around owned by root. Too much hassle.
+SERVER_PORT = 8080
 
 # When we use red, we can see the image on the resin but the resin
 # doesn't get cured. Helpful for alignment, focusing, calibration, etc.
 USE_RED = True
 
-# It seems like one rotation of the threaded rod is around 450 steps. Why
-# should that be? I thought it should be 3600 steps. That's a factor of 8.
-# Hmmmm. Anyway, one inch is then 450*20 = 9000
+# One rotation of the nut for the threaded rod is 450 steps, when I expected
+# to see 3600 steps. That's a factor of 8. Hmmm. Anyway, one Z inch is
+# 450 * 20 because the threaded rods are 1/4"-20. Still plenty of Z
+# resolution.
 STEPS_PER_INCH = 9000
 
 # To see fewer thumbnails in the home page, make this number bigger. If you
@@ -34,17 +37,20 @@ EXPOSURETIME = 3000
 
 SLICE_THICKNESS = 0.01
 
-PROJECTOR = 'NullProjector'
-
-STEPPER = 'NullStepper'
-
 MOCK_ARDUINO = True
 
-PROJECTOR = 'macbook.Projector'
+# default values
+UI = 'UserInterface'
+PROJECTOR = 'NullProjector'
+STEPPER = 'NullStepper'
+
+UI = 'ServerUI'
+
+# PROJECTOR = 'macbook.Projector'
 # STEPPER = 'macbook.Stepper'
 
 # PROJECTOR = 'rpi.Projector'
-STEPPER = 'rpi.Stepper'
+# STEPPER = 'rpi.Stepper'
 
 
 def get(attr, globals=globals()):

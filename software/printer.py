@@ -58,7 +58,50 @@ def make_slice(stl, z, imagefile, thumbnail):
               '-depth 8 /tmp/foo.rgb ' + imagefile)
 
 
-class Server(object):
+class UserInterface(object):
+
+    def start(self):
+        pass
+
+    def _motorUp(self):
+        if _filename is not None:
+            return
+        logger.debug("motor up")
+        _stepper.start(True)
+
+    def _motorDown(self):
+        if _filename is not None:
+            return
+        logger.debug("motor down")
+        _stepper.start(False)
+
+    def _motorStop(self):
+        if _filename is not None:
+            return
+        logger.debug("motor stop")
+        _stepper.stop()
+
+    def _busyPrinting(self):
+        return (_filename != None)
+
+    def _print(self, filename, thread=True):
+        # Yeah, I know, race condition on _filename.
+        # This isn't Twitter we're building here.
+        global _filename, _stl
+        if _filename is not None:
+            return
+        _filename = filename
+        _stl = Stl('models/' + filename)
+        if thread:
+            # http://stackoverflow.com/questions/17191744
+            _thread = threading.Thread(target=print_run)
+            _thread.setDaemon(True)
+            _thread.start()
+        else:
+            print_run()
+
+
+class ServerUI(UserInterface):
 
     def start(self):
         _config = {
@@ -83,31 +126,22 @@ class Server(object):
 
     @cherrypy.expose
     def _motorUp(self):
-        logger.debug("motor up")
-        _stepper.start(True)
+        super(ServerUI, self)._motorUp()
         return 'ok\n'
 
     @cherrypy.expose
     def _motorDown(self):
-        logger.debug("motor down")
-        _stepper.start(False)
+        super(ServerUI, self)._motorDown()
         return 'ok\n'
 
     @cherrypy.expose
     def _motorStop(self):
-        logger.debug("motor stop")
-        _stepper.stop()
+        super(ServerUI, self)._motorStop()
         return 'ok\n'
 
     @cherrypy.expose
     def _print(self, filename):
-        global _filename, _stl
-        _filename = filename
-        _stl = Stl('models/' + filename)
-        # http://stackoverflow.com/questions/17191744
-        _thread = threading.Thread(target=print_run)
-        _thread.setDaemon(True)
-        _thread.start()
+        super(ServerUI, self)._print(filename)
 
     @cherrypy.expose
     def _ipaddr(self):
@@ -190,15 +224,17 @@ def print_run():
 if __name__ == "__main__":
     import macbook   # noqa
     import rpi    # noqa
-    server = Server()
+    klass = config.lookup(globals(), config.UI)
+    if klass:
+        ui = klass()
     klass = config.lookup(globals(), config.PROJECTOR)
     if klass:
         _projector = klass()
         ps = _projector.getServer()
         if ps:
-            server.projector = ps
+            ui.projector = ps
     klass = config.lookup(globals(), config.STEPPER)
     if klass:
         _stepper = klass()
     logger.debug("Stepper: {0}\nProjector: {1}".format(_stepper, _projector))
-    server.start()
+    ui.start()
