@@ -110,6 +110,14 @@ class Server(object):
         _thread.start()
 
     @cherrypy.expose
+    def _ipaddr(self):
+        global _filename
+        _filename = "my_ip_addr.png"
+        os.system("./gen_ipaddr_image.sh")
+        _projector.project(_filename, 5000)
+        return 'ok\n'
+
+    @cherrypy.expose
     def index(self):
         def fewer_slices(_, count=[0]):
             count[0] += 1

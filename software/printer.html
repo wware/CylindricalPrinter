@@ -12,6 +12,7 @@
             #print:disabled { background-color: #ccc }
             button:disabled { background-color: #ccc }
             #pics li { display:inline-block; }
+            .clickable { cursor:pointer; }
         </style>
         <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
         <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js">
@@ -35,34 +36,47 @@
     </head>
     <body>
         <h1>Printer controls and status</h1>
+        <a class="clickable" onclick="window.open('/projector','_blank')">projector</a>
+        <br/>
+        <br/>
         <table>
             <tr>
                 <td>
-                    <button id="shutdown">Shutdown</button>
+                    <button id="shutdown" class="clickable">Shutdown</button>
                 </td>
                 <td>
                     <button id="print"
+                            class="clickable"
                             {% if chosenModel != none %}disabled{% endif %}>
                     Print
                     </button>
                 </td>
                 <td>
-                    <button onmousedown="$.ajax('/_motorUp')"
+                    <button class="clickable"
+                            onmousedown="$.ajax('/_motorUp')"
                             onmouseup="$.ajax('/_motorStop')"
                             {% if chosenModel != none %}disabled{% endif %}>
                     Up
                     </button>
                 </td>
                 <td>
-                    <button onmousedown="$.ajax('/_motorDown')"
+                    <button class="clickable"
+                            onmousedown="$.ajax('/_motorDown')"
                             onmouseup="$.ajax('/_motorStop')"
                             {% if chosenModel != none %}disabled{% endif %}>
                     Down
                     </button>
                 </td>
+                <td>
+                    <button onclick="$.ajax('/_ipaddr')"
+                            class="clickable"
+                            {% if chosenModel != none %}disabled{% endif %}>
+                    Show IP<br/>address
+                    </button>
+                </td>
             </tr>
             <tr>
-                <td style="border: 1px solid #ccc;">
+                <td colspan="2" style="border: 1px solid #ccc;">
                     <b>Models</b><br/>
                     {% for model in models %}
                         <input type="radio" name="model"
