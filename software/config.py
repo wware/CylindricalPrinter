@@ -10,9 +10,7 @@ os.system('mkdir -p ' + MODELS_DIR)
 # * Port number, directories
 
 SERVER_HOST = '0.0.0.0'
-# You could set the port to 80, but then you need to sudo printer.py and you
-# leave junk around owned by root. Too much hassle.
-SERVER_PORT = 8080
+SERVER_PORT = 80
 
 # When we use red, we can see the image on the resin but the resin
 # doesn't get cured. Helpful for alignment, focusing, calibration, etc.
@@ -53,8 +51,8 @@ UI = 'ServerUI'
 # PROJECTOR = 'macbook.Projector'
 # STEPPER = 'macbook.Stepper'
 
-# PROJECTOR = 'rpi.Projector'
-# STEPPER = 'rpi.Stepper'
+PROJECTOR = 'rpi.Projector'
+STEPPER = 'rpi.Stepper'
 
 
 def get(attr, globals=globals()):

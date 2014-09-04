@@ -21,6 +21,9 @@ STEPPER_TIME = 0.001
 
 class Projector(NullProjector):
 
+    def __init__(self):
+        self._go_dark()
+
     def shutdown(self):
         logger.debug("Projector shutdown")
         self._go_dark()
