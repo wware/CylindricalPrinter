@@ -153,7 +153,7 @@ class Stl:
             h = 0
             for point in points:
                 i = int((point[0].x - x0) / dx)
-                i = min(i, n)
+                i = max(h, min(i, n))
                 if i > h:
                     if point[1].x > 0:
                         pixel_on_callback(i - h)

@@ -31,7 +31,7 @@ THUMBNAIL_MODULO = 10
 # This is the XY scale factor, increasing this number makes the projected
 # shape smaller linearly. This number of STL units in the X and Y direction
 # maps to one projector screen width.
-XYSCALE = 200
+XYSCALE = 230
 
 # How many STL units in the Z direction make one inch.
 ZSCALE = 40

@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
 import cherrypy
+import json
 import os
 import threading
+import types
 
 from jinja2 import Environment, PackageLoader
 
@@ -13,7 +15,9 @@ from stl import Stl
 
 BLACK, RED, WHITE = '\x00\x00\x00', '\xff\x00\x00', '\xff\xff\xff'
 
-_filename = _stl = None
+_filename = _originalStl = _stl = _currentZ = _units = None
+_printing = False
+_unitScale = _scale = 1.0
 
 logger = config.get_logger('PRINTER')
 
@@ -44,7 +48,9 @@ def make_slice(stl, z, imagefile, thumbnail):
     x0 = (xmax + xmin) / 2 - 0.5 * config.XYSCALE
     y0 = (ymax + ymin) / 2 - 0.5 * config.XYSCALE
     xs = [(i / 1023.) * config.XYSCALE + x0 for i in range(1024)]
+    assert len(xs) == 1024
     ys = [((i + 128) / 1023.) * config.XYSCALE + y0 for i in range(768)]
+    assert len(ys) == 768
     outf = open('/tmp/foo.rgb', 'w')
 
     def pixel_on_callback(n, outf=outf):
@@ -81,24 +87,73 @@ class UserInterface(object):
         logger.debug("motor stop")
         _stepper.stop()
 
-    def _busyPrinting(self):
-        return (_filename != None)
+    def _getScaleInfo(self):
+        global _stl, _originalStl
+        if _originalStl is not None:
+            _stl = _originalStl.scale(_scale * _unitScale)
+        dct = {}
+        def jsonVector(v):
+            v = v or zeroVector
+            return {
+                'x': v.x,
+                'y': v.y,
+                'z': v.z
+            }
+        if _stl is not None:
+            dct['min'] = jsonVector(_stl._bbox._min)
+            dct['max'] = jsonVector(_stl._bbox._max)
+        return dct
 
-    def _print(self, filename, thread=True):
+    def _scaleInfo(self):
+        return json.dumps(self._getScaleInfo())
+
+    def _setScale(self, scale):
+        global _scale
+        _scale = float(scale)
+        return self._scaleInfo()
+
+    def _setUnits(self, units):
+        global _units, _unitScale
+        _units = units
+        if units == 'mm':
+            _unitScale = 1.0
+        elif units == 'cm':
+            _unitScale = 10.0
+        elif units == 'inch':
+            _unitScale = 25.4
+        else:
+            raise Exception('Bad units: ' + units)
+        return self._scaleInfo()
+
+    def _busyPrinting(self):
+        return _printing
+
+    def _getCurrentZ(self):
+        dct = self._getScaleInfo()
+        assert type(dct) is types.DictType
+        if _printing:
+            dct['z'] = _currentZ
+        return json.dumps(dct)
+
+    def _setModel(self, filename):
         # Yeah, I know, race condition on _filename.
         # This isn't Twitter we're building here.
-        global _filename, _stl
-        if _filename is not None:
-            return
-        _filename = filename
-        _stl = Stl('models/' + filename)
-        if thread:
-            # http://stackoverflow.com/questions/17191744
-            _thread = threading.Thread(target=print_run)
-            _thread.setDaemon(True)
-            _thread.start()
-        else:
-            print_run()
+        global _filename, _originalStl, _stl
+        if not _printing:
+            _filename = filename
+            _originalStl = Stl('models/' + filename)
+            _stl = _originalStl.scale(_scale * _unitScale)
+        return self._scaleInfo()
+
+    def _print(self, thread=True):
+        if _stl is not None:
+            if thread:
+                # http://stackoverflow.com/questions/17191744
+                _thread = threading.Thread(target=print_run)
+                _thread.setDaemon(True)
+                _thread.start()
+            else:
+                print_run()
 
 
 class ServerUI(UserInterface):
@@ -140,8 +195,24 @@ class ServerUI(UserInterface):
         return 'ok\n'
 
     @cherrypy.expose
-    def _print(self, filename):
-        super(ServerUI, self)._print(filename)
+    def _setModel(self, filename):
+        return super(ServerUI, self)._setModel(filename)
+
+    @cherrypy.expose
+    def _print(self):
+        return super(ServerUI, self)._print()
+
+    @cherrypy.expose
+    def _getCurrentZ(self):
+        return super(ServerUI, self)._getCurrentZ()
+
+    @cherrypy.expose
+    def _setScale(self, scale):
+        return super(ServerUI, self)._setScale(scale)
+
+    @cherrypy.expose
+    def _setUnits(self, units):
+        return super(ServerUI, self)._setUnits(units)
 
     @cherrypy.expose
     def _ipaddr(self):
@@ -165,19 +236,19 @@ class ServerUI(UserInterface):
                 os.system('convert static/' + slice.filename +
                           ' -geometry 80x60! static/' + slice.thumbnail)
         template = env.get_template('printer.html')
-        models = filter(lambda fn: fn.endswith(".stl"),
+        models = filter(lambda fn: fn.endswith(".stl") or fn.endswith(".STL"),
                         os.listdir(config.MODELS_DIR))
         return template.render(models=models,
                                chosenModel=_filename,
-                               slices=slices,
-                               bbox_min=_stl and _stl._bbox._min or zeroVector,
-                               bbox_max=_stl and _stl._bbox._max or zeroVector,
-                               currentz=_slices and _slices[-1].z or 0.)
+                               units=_units,
+                               scale=_scale,
+                               refreshTime=3*config.EXPOSURETIME,
+                               slices=slices)
 
     @cherrypy.expose
     def _upload(self, myFile):
         fn = config.MODELS_DIR + '/' + myFile.filename
-        assert fn.endswith('.stl')
+        assert fn.lower().endswith('.stl')
         # TODO if file exists, add "-1" or "-2" or whatever before ".stl"
         outf = open(fn, 'w')
         while True:
@@ -216,23 +287,31 @@ class NullStepper(object):
 
 
 def print_run():
-    global _slices, _filename
+    global _slices, _filename, _originalStl, _stl, _printing, _currentZ
+    if _printing:
+        return
+    _printing = True
     _slices = []
     logger.debug('Wiping history from previous print')
     os.system('rm -rf static/foo*.png static/thumbnail*.png')
     os.system('mkdir -p static')
-    z = _stl._bbox._min.z + 0.001
+    zmin = _stl._bbox._min.z
+    zmax = _stl._bbox._max.z
+    logger.debug('zmin = {0}'.format(zmin))
+    logger.debug('zmax = {0}'.format(zmax))
+    _currentZ = zmin + 0.0001
     i = 0
-    while z < _stl._bbox._max.z - 0.001:
+    while _currentZ < zmax - 0.0001:
         fn = 'foo%04d.png' % i
         th = 'thumbnail%04d.png' % i
         i += 1
-        make_slice(_stl, z, 'static/' + fn, 'static/' + th)
-        _slices.append(SliceData(fn, th, z))
+        make_slice(_stl, _currentZ, 'static/' + fn, 'static/' + th)
+        _slices.append(SliceData(fn, th, _currentZ))
         _projector.project(fn, config.EXPOSURETIME)
         _stepper.move(config.STEPS_PER_INCH * config.SLICE_THICKNESS)
-        z += config.SLICE_THICKNESS * config.ZSCALE
-    _filename = None
+        _currentZ += config.SLICE_THICKNESS * config.ZSCALE / _unitScale
+    _filename = _originalStl = _stl = None
+    _printing = False
 
 
 if __name__ == "__main__":

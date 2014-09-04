@@ -2,31 +2,130 @@
     <head>
         <meta http-equiv="refresh" content="300">
         <style>
-            button { padding: 2px; width: 120px; height: 60px; font-size: 120%; }
-            div.flow { padding: 2px; display:inline-block; }
+            button { padding:2px; width:120px; height:60px; font-size:120%; }
+            div.flow { padding:2px; display:inline-block; }
             img { padding: 2px; }
             td { vertical-align: top; }
             td.pic { text-align: center; }
+            #scale { width:60px; margin:10px; }
             #shutdown { background-color: #f88; }
             #print { background-color: #cfc; }
             #print:disabled { background-color: #ccc }
             button:disabled { background-color: #ccc }
             #pics li { display:inline-block; }
+            li.choice { list-style:none; }
+            .pointy { cursor:pointer; }
             .clickable { cursor:pointer; }
         </style>
-        <script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-        <script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js">
-        </script>
+        <script src="http://code.jquery.com/jquery-2.1.1.min.js"></script>
         <script type="text/javascript">
             $(function() {
-                $("#print").click(function() {
+                var exactScaleRadioButtons = $('input[type="radio"][name="exactscale"]');
+                var unitRadioButtons = $('input[type="radio"][name="units"]');
+                var modelRadioButtons = $('input[type="radio"][name="model"]');
+                var _dimensions;
+                var snooze = false;
+                var round = function(num) {
+                    return Math.round(num * 1000) / 1000;
+                };
+                var updateDimensions = function(dimensions) {
+                    if (dimensions === undefined) {
+                        dimensions = _dimensions;
+                    } else {
+                        _dimensions = dimensions;
+                    }
+                    if (dimensions !== undefined) {
+                        if (dimensions.substring) {
+                            dimensions = JSON.parse(dimensions);
+                        }
+                        if (dimensions.min && dimensions.max) {
+                            $('#xmin').text(round(dimensions.min.x));
+                            $('#xmax').text(round(dimensions.max.x));
+                            $('#ymin').text(round(dimensions.min.y));
+                            $('#ymax').text(round(dimensions.max.y));
+                            $('#zmin').text(round(dimensions.min.z));
+                            $('#zmax').text(round(dimensions.max.z));
+                        }
+                    }
+                };
+                var getCurrentZ = function() {
+                    $.ajax('/_getCurrentZ').then(function(dimensions) {
+                        dimensions = JSON.parse(dimensions);
+                        var z = dimensions.z;
+                        if (z === undefined) {
+                            $('#curz').text('');
+                            $('.clickable').each(function (i, input) {
+                                input.disabled = false;
+                            });
+                        } else {
+                            $('#curz').text(round(z));
+                        }
+                        updateDimensions(dimensions);
+                    });
+                };
+                modelRadioButtons.change(function(x) {
+                    if (snooze) return;
                     var chosen = $('input[name=model]:checked').val();
-                    $.ajax("/_print?filename=" + chosen).then(function(ignored) {
-                        location.reload();
+                    if (chosen) {
+                        $.ajax("/_setModel?filename=" + chosen).then(
+                            updateDimensions
+                        );
+                    }
+                });
+                $("#print").click(function() {
+                    $.ajax("/_print").then(function(ignored) {
+                        $('.clickable').each(function (i, input) {
+                            input.disabled = true;
+                        });
                     });
                 });
                 $("#shutdown").click(function() {
                     $.ajax('/shutdown');
+                });
+                $('#scale').change(function(x) {
+                    if (snooze) return;
+                    x = parseFloat(x.target.value);
+                    snooze = true;
+                    exactScaleRadioButtons.each(function(x, y) {
+                        y.checked = false;
+                    });
+                    snooze = false;
+                    $.post('/_setScale', {
+                        scale: x
+                    }).then(updateDimensions);
+                });
+                exactScaleRadioButtons.change(function(x) {
+                    if (snooze) return;
+                    x = parseFloat(x.target.value);
+                    snooze = true;
+                    $('#scale').val(x);
+                    snooze = false;
+                    $.post('/_setScale', {
+                        scale: x
+                    }).then(updateDimensions);
+                });
+                unitRadioButtons.change(function(x) {
+                    $.post('/_setUnits', {
+                        units: x.target.value
+                    }).then(updateDimensions);
+                });
+                var chosenUnits = "{{units}}";
+                if (chosenUnits == "None") {
+                    chosenUnits = "mm";
+                }
+                unitRadioButtons.each(function(i, x) {
+                    x.checked = (x.value == chosenUnits);
+                });
+                var chosenScale = parseFloat({{scale}});
+                if (isNaN(chosenScale)) {
+                    chosenScale = 1;
+                }
+                $('#scale').val(chosenScale);
+                exactScaleRadioButtons.each(function(i, x) {
+                    x.checked = (x.value == chosenScale);
+                });
+                getCurrentZ();
+                setInterval(getCurrentZ, {{refreshTime}});
             });
         </script>
     </head>
@@ -38,35 +137,31 @@
         <table>
             <tr>
                 <td>
-                    <button id="shutdown" class="clickable">Shutdown</button>
+                    <button id="shutdown" class="pointy">Shutdown</button>
                 </td>
                 <td>
                     <button id="print"
-                            class="clickable"
-                            {% if chosenModel != none %}disabled{% endif %}>
+                            class="clickable">
                     Print
                     </button>
                 </td>
                 <td>
                     <button class="clickable"
                             onmousedown="$.ajax('/_motorUp')"
-                            onmouseup="$.ajax('/_motorStop')"
-                            {% if chosenModel != none %}disabled{% endif %}>
+                            onmouseup="$.ajax('/_motorStop')">
                     Up
                     </button>
                 </td>
                 <td>
                     <button class="clickable"
                             onmousedown="$.ajax('/_motorDown')"
-                            onmouseup="$.ajax('/_motorStop')"
-                            {% if chosenModel != none %}disabled{% endif %}>
+                            onmouseup="$.ajax('/_motorStop')">
                     Down
                     </button>
                 </td>
                 <td>
                     <button onclick="$.ajax('/_ipaddr')"
-                            class="clickable"
-                            {% if chosenModel != none %}disabled{% endif %}>
+                            class="clickable">
                     Show IP<br/>address
                     </button>
                 </td>
@@ -82,17 +177,44 @@
                 </td>
                 <td style="border: 1px solid #ccc;">
                     <b>STL units</b><br/>
-                    X: {{ bbox_min.x|round(3) }} to {{ bbox_max.x|round(3) }}<br/>
-                    Y: {{ bbox_min.y|round(3) }} to {{ bbox_max.y|round(3) }}<br/>
-                    Z: {{ bbox_min.z|round(3) }} to {{ bbox_max.z|round(3) }}<br/>
-                    Current Z: {{ currentz|round(3) }}
+                    X: <span id="xmin"></span> to <span id="xmax"></span><br/>
+                    Y: <span id="ymin"></span> to <span id="ymax"></span><br/>
+                    Z: <span id="zmin"></span> to <span id="zmax"></span><br/>
+                    Current Z: <span id="curz"></span>
                 </td>
                 <td colspan="2" style="border: 1px solid #ccc;">
                     <b>Upload a STL model</b><br/>
                     <form action="/_upload" method="post" enctype="multipart/form-data">
-                    Filename: <input type="file" name="myFile" /><br />
-                    <input type="submit" />
+                    <input type="file" name="myFile" /><br />
+                    <input type="submit" value="Upload it"/>
                     </form>
+                </td>
+            </tr>
+            <tr>
+                <td colspan="3" style="border: 1px solid #ccc;">
+                    <b>Scale</b><br/>
+                    <input type="radio" name="exactscale" value="0.1"/>0.1
+                    <input type="radio" name="exactscale" value="0.2"/>0.2
+                    <input type="radio" name="exactscale" value="0.5"/>0.5
+                    <input type="radio" name="exactscale" value="1"/>1
+                    <input type="radio" name="exactscale" value="2"/>2
+                    <input type="radio" name="exactscale" value="5"/>5
+                    <input type="radio" name="exactscale" value="10"/>10<br/>
+                    <input type="input" id="scale" value="1"/>
+                </td>
+                <td colspan="2" style="border: 1px solid #ccc;">
+                    <b>Units</b><br/>
+                    <ul>
+                        <li class="choice">
+                            <input type="radio" name="units" value="mm" checked/>Millimeters
+                        </li>
+                        <li class="choice">
+                            <input type="radio" name="units" value="cm"/>Centimeters
+                        </li>
+                        <li class="choice">
+                            <input type="radio" name="units" value="inch"/>Inches
+                        </li>
+                    </ul>
                 </td>
             </tr>
         </table>
