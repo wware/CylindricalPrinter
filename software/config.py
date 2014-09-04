@@ -1,4 +1,8 @@
 import logging
+import os
+
+MODELS_DIR = os.getcwd() + '/models'
+os.system('mkdir -p ' + MODELS_DIR)
 
 # Things that can go in here:
 # * Everything that is a constant in teststl.py

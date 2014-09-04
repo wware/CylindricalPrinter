@@ -27,10 +27,6 @@
                 });
                 $("#shutdown").click(function() {
                     $.ajax('/shutdown');
-                });
-                $("#file").change(function() {
-                    console.log($("#file"));
-                });
             });
         </script>
     </head>
@@ -93,7 +89,10 @@
                 </td>
                 <td colspan="2" style="border: 1px solid #ccc;">
                     <b>Upload a STL model</b><br/>
-                    <input type="file" id="file" onchange="upload_file()">
+                    <form action="/_upload" method="post" enctype="multipart/form-data">
+                    Filename: <input type="file" name="myFile" /><br />
+                    <input type="submit" />
+                    </form>
                 </td>
             </tr>
         </table>

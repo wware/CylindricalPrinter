@@ -166,13 +166,27 @@ class ServerUI(UserInterface):
                           ' -geometry 80x60! static/' + slice.thumbnail)
         template = env.get_template('printer.html')
         models = filter(lambda fn: fn.endswith(".stl"),
-                        os.listdir(os.getcwd() + '/models'))
+                        os.listdir(config.MODELS_DIR))
         return template.render(models=models,
                                chosenModel=_filename,
                                slices=slices,
                                bbox_min=_stl and _stl._bbox._min or zeroVector,
                                bbox_max=_stl and _stl._bbox._max or zeroVector,
                                currentz=_slices and _slices[-1].z or 0.)
+
+    @cherrypy.expose
+    def _upload(self, myFile):
+        fn = config.MODELS_DIR + '/' + myFile.filename
+        assert fn.endswith('.stl')
+        # TODO if file exists, add "-1" or "-2" or whatever before ".stl"
+        outf = open(fn, 'w')
+        while True:
+            data = myFile.file.read(8192)
+            if not data:
+                break
+            outf.write(data)
+        outf.close()
+        raise cherrypy.HTTPRedirect("/")
 
 
 class NullProjector(object):
