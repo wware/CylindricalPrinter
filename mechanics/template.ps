@@ -43,29 +43,54 @@
 % to move things around for the different pages.
 
 /point {   % x y ->
+    2 dict begin
     /y exch def
     /x exch def
     x y 0.125 inch add MT
     x y 0.125 inch sub LT S
     x 0.125 inch add y MT
     x 0.125 inch sub y LT S
+    end
 } def
 
 /rectangle {   % x1 y1 x2 y2 ->
+    4 dict begin
     /y2 exch def
     /x2 exch def
     /y1 exch def
     /x1 exch def
     x1 y1 MT x1 y2 LT x2 y2 LT x2 y1 LT x1 y1 LT S
+    end
 } def
 
-/RC {   % rotate around center: x y theta -> x' y'
+/dRP {   % rotate around point: x y dx dy theta -> x' y'
+    6 dict begin
     dup cos /costheta exch def
     sin /sintheta exch def
-    YC sub /y exch def
-    XC sub /x exch def
-    x costheta mul y sintheta mul sub XC add
-    x sintheta mul y costheta mul add YC add
+    /dy exch def
+    /dx exch def
+    /y exch def
+    /x exch def
+    dx costheta mul dy sintheta mul sub x add
+    dx sintheta mul dy costheta mul add y add
+    end
+} def
+
+/RP {   % rotate around point: x0 y0 x y theta -> x' y'
+    6 dict begin
+    dup cos /costheta exch def
+    sin /sintheta exch def
+    /y exch def
+    /x exch def
+    /y0 exch def
+    /x0 exch def
+    x x0 sub costheta mul y y0 sub sintheta mul sub x0 add
+    x x0 sub sintheta mul y y0 sub costheta mul add y0 add
+    end
+} def
+
+/RC {   % rotate around center (XC,YC): x y theta -> x' y'
+    XC YC 5 2 roll RP
 } def
 
 % inner radius of the main support
@@ -74,24 +99,43 @@
 % radius of the three threaded rods that raise/lower the build platform
 /R      4.5 inch def
 
-% radius of the build platform, and outer radius of the cover plate
+% radius of the build platform
 /BPR    5 inch def
 
+% outer radius of the cover plate, and radius at end of outriggers
+/CR              BPR def
+/coverOutrigger   7 inch def
+
 % radius of the nuts & bolts that hold up the cover plate
-/R2     6   inch def
+/R2     6.5   inch def
 
 % outer radius of the main support
 /outerR 7.5 inch def
+% radius for stepper outrigger
+/stepperOutrigger 10 inch def
 
 /onepage {
     reducedBy 1 ne {
-        1.5 inch 1.5 inch MT
+        8 inch 1.5 inch MT
         (Enlarge by ) show
         reducedBy (   ) cvs show
         (X) show
     } if
 
-    % arrow pointing at the projector, to stay oriented
+    /stepperSprocket_xy {
+        XC stepperOutrigger add 1.5 inch sub YC 240 RC
+    } def
+    /sprocket1_xy {
+        XC R add YC   60 RC
+    } def
+    /sprocket2_xy {
+        XC R add YC  180 RC
+    } def
+    /sprocket3_xy {
+        XC R add YC  300 RC
+    } def
+
+    %% arrow pointing at the projector, to stay oriented
     XC 1 inch sub YC 0.25 inch add  MT  (Projector) show
     XC 2 inch sub YC  MT
     XC 2 inch add YC  LT
@@ -99,78 +143,133 @@
     1  inch  0.5 inch RLT
     -1 inch  0.5 inch RLT
 
-    XC R add YC   60 RC point
-    XC R add YC  180 RC point
-    XC R add YC  300 RC point
+    %% Wingnut bolts that hold the thing on the bucket
+    XC 6.25 inch add YC  45 RC point
+    XC 6.25 inch add YC 165 RC point
+    XC 6.25 inch add YC 315 RC point
+
+    %% Threaded rods
+    sprocket1_xy point
+    sprocket2_xy point
+    sprocket3_xy point
+
+    %% Nuts, bolts, spacers for the cover plate
     XC R2 add YC   60 RC point
     XC R2 add YC  180 RC point
     XC R2 add YC  300 RC point
 
-    % main support, inner radius
+    %% main support, inner radius
     XC YC innerR 0 360 arc S
 
-    % main support, mirror mount holes
-    XC -1 inch add YC 6.5 inch add point
-    XC 1  inch add YC 6.5 inch add point
-    XC             YC 6.5 inch sub point
+    %% main support, mirror mount holes
+    XC 1 inch add YC 6.5 inch add point
+    XC 1 inch sub YC 6.5 inch add point
+    XC 1 inch add YC 6.5 inch sub point
+    XC 1 inch sub YC 4.5 inch sub point
 
-    % build plate
+    %% mirror mount outline
+    XC 1.5 inch sub YC 7 inch add
+    XC 1.5 inch add YC 7 inch sub rectangle
+
+    %% build plate
     XC YC BPR 0 360 arc S
 
-    % cover plate, we've already drawn the circular portion
+    %% cover plate, we've already drawn the circular portion
     /y1 0.5 inch def
-    /theta1 y1 BPR arcsin def
-    /outriggerX 6.5 inch def
+    /theta1 y1 CR arcsin def
     /outrigger {
+        1 dict begin
         /theta exch def
-        XC BPR theta1 cos mul add YC 0.5 inch sub theta RC MT
-        XC outriggerX add YC 0.5 inch sub theta RC LT
-        XC outriggerX add YC 0.5 inch add theta RC LT
-        XC BPR theta1 cos mul add YC 0.5 inch add theta RC LT S
+        XC CR theta1 cos mul add YC y1 sub theta RC MT
+        XC coverOutrigger add YC y1 sub theta RC LT
+        XC coverOutrigger add YC y1 add theta RC LT
+        XC CR theta1 cos mul add YC y1 add theta RC LT S
+        end
     } def
     60 outrigger
     180 outrigger
     300 outrigger
 
-    % main support, outline
-    /y1 1.5 inch def
-    /y2 3 inch def
+    %% main support, outline
+    /y1 2 inch def
+    /y2 3.5 inch def
     /theta1 y1 outerR arcsin def
     /theta2 y2 outerR arcsin def
-    /outriggerX 11 inch def
     XC YC outerR 0 240 theta2 sub arc
-    XC outriggerX add YC y2 sub 240 RC LT
-    XC outriggerX add YC y1 sub 240 RC LT
-    XC YC outerR 240 theta1 sub 240 theta1 add arc
-    XC outriggerX add YC y1 add 240 RC LT
-    XC outriggerX add YC y2 add 240 RC LT
+    XC stepperOutrigger add YC y2 sub 240 RC LT
+    XC stepperOutrigger add YC y1 sub 240 RC LT
+    XC YC outerR 1.5 inch sub 240 theta1 sub 240 theta1 add arc
+    XC stepperOutrigger add YC y1 add 240 RC LT
+    XC stepperOutrigger add YC y2 add 240 RC LT
     XC YC outerR 240 theta2 add 360 arc S
 
-    XC outriggerX add 1.5 inch sub YC 2.25 inch sub 240 RC point
-    XC outriggerX add 1.5 inch sub YC 2.25 inch sub 240 RC
-    2 copy 4.375 inch 315 345 arc
-    2 copy 4.625 inch 345 315 arcn
-    2 copy 4.375 inch 315 345 arc stroke
+    %% the pivot hole for the stepper plate
+    XC stepperOutrigger add 1.5 inch sub YC 2.75 inch sub 240 RC point
 
-    %% stepper plate
-    XC 11 inch add YC 7 inch add XC 14 inch add YC 1 inch add rectangle
-    XC 12.5 inch add YC 6.25 inch add point
-    XC 12.5 inch add YC 1.75 inch add point
-    XC 12.5 inch add YC 4 inch add point
-    XC 13.475 inch add YC 3.125 inch add point
-    XC 13.475 inch add YC 4.975 inch add point
-    XC 11.625 inch add YC 3.125 inch add point
-    XC 11.625 inch add YC 4.975 inch add point
+    %% the circular tensioner track for the stepper plate
+    XC stepperOutrigger add 1.5 inch sub YC 2.75 inch add 240 RC point
+    XC stepperOutrigger add 1.5 inch sub YC 2.75 inch sub 240 RC
+    % 5.5 plus or minus 0.125, 5.5 comes from distance between pivot and track
+    2 copy 5.375 inch 315 345 arc
+    2 copy 5.625 inch 345 315 arcn
+    %2 copy 5.375 inch 315 345 arc S
+    5.375 inch 315 345 arc S
 
-    %% mirror mount
-    XC 8 inch add YC 7 inch add XC 11 inch add YC 7 inch sub rectangle
-    XC 8.5  inch add YC 6.5 inch add point
-    XC 10.5 inch add YC 6.5 inch add point
-    XC 9.5  inch add YC 6.5 inch sub point
+    /stepperPlate {    % x y theta ->
+        3 dict begin
+        /theta exch def
+        /y exch def
+        /x exch def
+        x y -2 inch -3.5 inch theta dRP MT
+        x y -2 inch  3.5 inch theta dRP LT
+        x y  2 inch  3.5 inch theta dRP LT
+        x y  2 inch -3.5 inch theta dRP LT
+        x y -2 inch -3.5 inch theta dRP LT S
+        %% nema 23 motor
+        x y point
+        x y  1.312 inch 0 theta dRP point
+        x y -1.312 inch 0 theta dRP point
+        x y 0  1.312 inch theta dRP point
+        x y 0 -1.312 inch theta dRP point
+        end
+    } def
+
+    stepperSprocket_xy 60 stepperPlate
+
+    %% things with dotted lines
+    gsave [2 4] 0 setdash
+
+    %% bucket outer diameter
+    XC YC 12 2 div inch 0 360 arc S
+    %% bucket inner diameter
+    XC YC 11.25 2 div inch 0 360 arc S
+
+    %% sprocket outlines
+    sprocket1_xy 0.625 inch 0 360 arc S
+    sprocket2_xy 0.625 inch 0 360 arc S
+    sprocket3_xy 0.625 inch 0 360 arc S
+    stepperSprocket_xy 0.625 inch 0 360 arc S
+
+    %% approximate path of bicycle chain
+    /sprocketRadius {
+        0.625 inch exch 0 exch dRP
+    } def
+    stepperSprocket_xy 315 sprocketRadius MT
+    sprocket3_xy 315 sprocketRadius LT
+    sprocket3_xy   0 sprocketRadius MT
+    sprocket1_xy   0 sprocketRadius LT
+    sprocket1_xy 120 sprocketRadius MT
+    sprocket2_xy 120 sprocketRadius LT
+    sprocket2_xy 180 sprocketRadius MT
+    stepperSprocket_xy 180 sprocketRadius LT S
+
+    %% end of things with dotted lines
+    grestore
 } def
 
 /registrationMarks {
     /RM {   % x y ->
+        4 dict begin
         /y exch def
         /x exch def
         /r 0.125 inch def
@@ -178,6 +277,7 @@
         x d sub y d sub MT x d add y d add LT S
         x d sub y d add MT x d add y d sub LT S
         x y r 0 360 arc S
+        end
     } def
     0.5 inch   0.5 inch   RM
     0.5 inch   10.5 inch  RM
@@ -195,6 +295,7 @@
 
 /overlappingSeparatePages {
     userdict /reducedBy 1 put
+    3 dict begin
     /incr  { 1 index load add userdict 3 1 roll put } def
     /XC  8.5   inch def
     /YC  1.5 inch def
@@ -216,6 +317,7 @@
 
     /YC 10 inch incr
     onepage registrationMarks showpage
+    end
 } def
 
 /singleBigSheet {
