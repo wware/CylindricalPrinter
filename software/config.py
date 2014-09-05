@@ -16,6 +16,10 @@ SERVER_PORT = 80
 # doesn't get cured. Helpful for alignment, focusing, calibration, etc.
 USE_RED = True
 
+# In case I forget which way I wired the stepper, I have a config bit for
+# reversing it without soldering.
+STEPPER_POLARITY = True
+
 # One rotation of the nut for the threaded rod is 450 steps, when I expected
 # to see 3600 steps. That's a factor of 8. Hmmm. Anyway, one Z inch is
 # 450 * 20 because the threaded rods are 1/4"-20. Still plenty of Z

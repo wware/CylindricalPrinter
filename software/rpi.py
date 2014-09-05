@@ -83,6 +83,7 @@ class Stepper(NullStepper):
 
     def start(self, direction):
         global _steps
+        direction ^= config.STEPPER_POLARITY
         NullStepper.start(self, direction)
         if direction:
             GPIO.output(18, GPIO.HIGH)
@@ -99,6 +100,8 @@ class Stepper(NullStepper):
     def move(self, steps):
         global _steps
         logger.debug("Move stepper {0} steps".format(steps))
+        if config.STEPPER_POLARITY:
+            steps = -steps
         if steps > 0:
             GPIO.output(18, GPIO.HIGH)
         else:
