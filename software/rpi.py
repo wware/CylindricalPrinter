@@ -19,7 +19,6 @@ else:
 logger = config.get_logger('RPI')
 
 FBI = "/usr/local/bin/fbi"
-STEPPER_TIME = 0.005
 
 
 class Projector(NullProjector):
@@ -75,9 +74,9 @@ class Stepper(NullStepper):
                         _running = False
                         return
                     GPIO.output(17, GPIO.HIGH)
-                    time.sleep(STEPPER_TIME)
+                    time.sleep(config.STEPPER_TIME)
                     GPIO.output(17, GPIO.LOW)
-                    time.sleep(STEPPER_TIME)
+                    time.sleep(config.STEPPER_TIME)
                     _steps -= 1
                 logger.debug("Stepper is stopping")
 

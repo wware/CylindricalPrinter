@@ -20,11 +20,13 @@ USE_RED = True
 # reversing it without soldering.
 STEPPER_POLARITY = True
 
-# One rotation of the nut for the threaded rod is 450 steps, when I expected
-# to see 3600 steps. That's a factor of 8. Hmmm. Anyway, one Z inch is
-# 450 * 20 because the threaded rods are 1/4"-20. Still plenty of Z
-# resolution.
-STEPS_PER_INCH = 9000
+# How many seconds between level transitions does the stepper need? Looks
+# like about a millisecond.
+STEPPER_TIME = 0.001
+
+# One rotation of the nut for the threaded rod is 200 steps. One Z inch is
+# 200 * 20 because the threaded rods are 1/4"-20.
+STEPS_PER_INCH = 4000
 
 # To see fewer thumbnails in the home page, make this number bigger. If you
 # want to see every thumbnail, set this to 1.
@@ -38,9 +40,11 @@ XYSCALE = 230
 # How many STL units in the Z direction make one inch.
 ZSCALE = 40
 
-# EXPOSURETIME = 60000    # milliseconds
-EXPOSURETIME = 3000
+EXPOSURETIME = 60000    # milliseconds
+# EXPOSURETIME = 3000
 
+# This is in inches, because of STEPS_PER_INCH. I should probably move it all
+# to millimeters, we'll see if I do that.
 SLICE_THICKNESS = 0.01
 
 MOCK_ARDUINO = True
