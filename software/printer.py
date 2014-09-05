@@ -4,7 +4,6 @@ import cherrypy
 import json
 import os
 import threading
-import types
 
 from jinja2 import Environment, PackageLoader
 
@@ -17,6 +16,7 @@ BLACK, RED, WHITE = '\x00\x00\x00', '\xff\x00\x00', '\xff\xff\xff'
 
 _filename = _originalStl = _stl = _currentZ = _units = None
 _printing = False
+_stlDirty = True
 _unitScale = _scale = 1.0
 
 logger = config.get_logger('PRINTER')
@@ -87,11 +87,10 @@ class UserInterface(object):
         logger.debug("motor stop")
         _stepper.stop()
 
-    def _getScaleInfo(self):
-        global _stl, _originalStl
-        if _originalStl is not None:
-            _stl = _originalStl.scale(_scale * _unitScale)
+    def _getZInfo(self):
+        global _stl, _originalStl, _stlDirty
         dct = {}
+
         def jsonVector(v):
             v = v or zeroVector
             return {
@@ -99,21 +98,24 @@ class UserInterface(object):
                 'y': v.y,
                 'z': v.z
             }
-        if _stl is not None:
+        if _originalStl is not None:
+            if _stlDirty:
+                _stl = _originalStl.scale(_scale * _unitScale)
+                _stlDirty = False
             dct['min'] = jsonVector(_stl._bbox._min)
             dct['max'] = jsonVector(_stl._bbox._max)
-        return dct
-
-    def _scaleInfo(self):
-        return json.dumps(self._getScaleInfo())
+        if _printing:
+            dct['z'] = _currentZ
+        return json.dumps(dct)
 
     def _setScale(self, scale):
-        global _scale
+        global _scale, _stlDirty
         _scale = float(scale)
-        return self._scaleInfo()
+        _stlDirty = True
+        return self._getZInfo()
 
     def _setUnits(self, units):
-        global _units, _unitScale
+        global _units, _unitScale, _stlDirty
         _units = units
         if units == 'mm':
             _unitScale = 1.0
@@ -123,14 +125,15 @@ class UserInterface(object):
             _unitScale = 25.4
         else:
             raise Exception('Bad units: ' + units)
-        return self._scaleInfo()
+        _stlDirty = True
+        return self._getZInfo()
 
-    def _busyPrinting(self):
-        return _printing
+    def _isPrinting(self):
+        return _printing and "yes" or "no"
 
     def _getCurrentZ(self):
         dct = self._getScaleInfo()
-        assert type(dct) is types.DictType
+        assert isinstance(dct, dict)
         if _printing:
             dct['z'] = _currentZ
         return json.dumps(dct)
@@ -138,22 +141,23 @@ class UserInterface(object):
     def _setModel(self, filename):
         # Yeah, I know, race condition on _filename.
         # This isn't Twitter we're building here.
-        global _filename, _originalStl, _stl
+        global _filename, _originalStl, _stl, _stlDirty
         if not _printing:
+            _stl = _originalStl = None
             _filename = filename
             _originalStl = Stl('models/' + filename)
-            _stl = _originalStl.scale(_scale * _unitScale)
-        return self._scaleInfo()
+            _stlDirty = True
+        return self._getZInfo()
 
     def _print(self, thread=True):
-        if _stl is not None:
-            if thread:
-                # http://stackoverflow.com/questions/17191744
-                _thread = threading.Thread(target=print_run)
-                _thread.setDaemon(True)
-                _thread.start()
-            else:
-                print_run()
+        global _filename, _originalStl, _stl, _stlDirty
+        if thread:
+            # http://stackoverflow.com/questions/17191744
+            _thread = threading.Thread(target=print_run)
+            _thread.setDaemon(True)
+            _thread.start()
+        else:
+            print_run()
 
 
 class ServerUI(UserInterface):
@@ -203,8 +207,12 @@ class ServerUI(UserInterface):
         return super(ServerUI, self)._print()
 
     @cherrypy.expose
-    def _getCurrentZ(self):
-        return super(ServerUI, self)._getCurrentZ()
+    def _isPrinting(self):
+        return super(ServerUI, self)._isPrinting()
+
+    @cherrypy.expose
+    def _getZInfo(self):
+        return super(ServerUI, self)._getZInfo()
 
     @cherrypy.expose
     def _setScale(self, scale):
@@ -287,10 +295,15 @@ class NullStepper(object):
 
 
 def print_run():
-    global _slices, _filename, _originalStl, _stl, _printing, _currentZ
-    if _printing:
+    global _slices, _filename, _originalStl, _stl
+    global _stlDirty, _printing, _currentZ
+    if _printing or _originalStl is None:
+        _printing = False
         return
     _printing = True
+    if _stl is None or _stlDirty:
+        _stl = _originalStl.scale(_scale * _unitScale)
+        _stlDirty = False
     _slices = []
     logger.debug('Wiping history from previous print')
     os.system('rm -rf static/foo*.png static/thumbnail*.png')
@@ -308,7 +321,8 @@ def print_run():
         make_slice(_stl, _currentZ, 'static/' + fn, 'static/' + th)
         _slices.append(SliceData(fn, th, _currentZ))
         _projector.project(fn, config.EXPOSURETIME)
-        _stepper.move(config.STEPS_PER_INCH * config.SLICE_THICKNESS)
+        # move down
+        _stepper.move(-config.STEPS_PER_INCH * config.SLICE_THICKNESS)
         _currentZ += config.SLICE_THICKNESS * config.ZSCALE / _unitScale
     _filename = _originalStl = _stl = None
     _printing = False

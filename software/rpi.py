@@ -4,19 +4,22 @@
 import os
 
 import config
+import platform
 import time
 import threading
 
 from printer import NullProjector, NullStepper
 
-try:
+if platform.uname()[:2] == ('Linux', 'raspberrypi'):
+    os.system('pip install RPi.GPIO')
     import RPi.GPIO as GPIO
-except:
+else:
     import mock_rpi as GPIO
 
 logger = config.get_logger('RPI')
 
-STEPPER_TIME = 0.001
+FBI = "/usr/local/bin/fbi"
+STEPPER_TIME = 0.005
 
 
 class Projector(NullProjector):
@@ -30,12 +33,12 @@ class Projector(NullProjector):
 
     def _go_dark(self):
         # project black, and kill any outstanding fbi processes
-        cmd = "fbi -S -1 -T 1 -d /dev/fb0 black.png"
+        cmd = FBI + " -S -1 -T 1 -d /dev/fb0 black.png"
         os.system(cmd)
         os.system("killall -KILL fbi")
 
     def project(self, filename, milliseconds):
-        cmd = "fbi -S -1 -T 1 -d /dev/fb0 {0}".format(
+        cmd = FBI + " -S -1 -T 1 -d /dev/fb0 {0}".format(
             "static/" + filename
         )
         logger.debug(cmd)
@@ -51,8 +54,6 @@ _steps = 0
 class Stepper(NullStepper):
 
     def __init__(self):
-        os.system('pip install RPi.GPIO')
-        import RPi.GPIO as GPIO
         # http://elinux.org/RPi_Low-level_peripherals#Python
         # GPIO17 is the pulses input of the stepper controller
         # GPIO18 is the direction input

@@ -23,33 +23,12 @@
                 var exactScaleRadioButtons = $('input[type="radio"][name="exactscale"]');
                 var unitRadioButtons = $('input[type="radio"][name="units"]');
                 var modelRadioButtons = $('input[type="radio"][name="model"]');
-                var _dimensions;
                 var snooze = false;
                 var round = function(num) {
                     return Math.round(num * 1000) / 1000;
                 };
-                var updateDimensions = function(dimensions) {
-                    if (dimensions === undefined) {
-                        dimensions = _dimensions;
-                    } else {
-                        _dimensions = dimensions;
-                    }
-                    if (dimensions !== undefined) {
-                        if (dimensions.substring) {
-                            dimensions = JSON.parse(dimensions);
-                        }
-                        if (dimensions.min && dimensions.max) {
-                            $('#xmin').text(round(dimensions.min.x));
-                            $('#xmax').text(round(dimensions.max.x));
-                            $('#ymin').text(round(dimensions.min.y));
-                            $('#ymax').text(round(dimensions.max.y));
-                            $('#zmin').text(round(dimensions.min.z));
-                            $('#zmax').text(round(dimensions.max.z));
-                        }
-                    }
-                };
-                var getCurrentZ = function() {
-                    $.ajax('/_getCurrentZ').then(function(dimensions) {
+                var getZInfo = function() {
+                    $.ajax('/_getZInfo').then(function(dimensions) {
                         dimensions = JSON.parse(dimensions);
                         var z = dimensions.z;
                         if (z === undefined) {
@@ -60,7 +39,14 @@
                         } else {
                             $('#curz').text(round(z));
                         }
-                        updateDimensions(dimensions);
+                        if (dimensions.min && dimensions.max) {
+                            $('#xmin').text(round(dimensions.min.x));
+                            $('#xmax').text(round(dimensions.max.x));
+                            $('#ymin').text(round(dimensions.min.y));
+                            $('#ymax').text(round(dimensions.max.y));
+                            $('#zmin').text(round(dimensions.min.z));
+                            $('#zmax').text(round(dimensions.max.z));
+                        }
                     });
                 };
                 modelRadioButtons.change(function(x) {
@@ -68,15 +54,26 @@
                     var chosen = $('input[name=model]:checked').val();
                     if (chosen) {
                         $.ajax("/_setModel?filename=" + chosen).then(
-                            updateDimensions
+                            getZInfo
                         );
                     }
                 });
-                $("#print").click(function() {
-                    $.ajax("/_print").then(function(ignored) {
-                        $('.clickable').each(function (i, input) {
-                            input.disabled = true;
+                var pollZ = function() {
+                    setTimeout(function() {
+                        getZInfo();
+                        $.ajax("/_isPrinting").then(function(x) {
+                            if (x === 'yes') {
+                                $('.clickable').each(function (i, input) {
+                                    input.disabled = true;
+                                });
+                                pollZ();
+                            }
                         });
+                    }, {{refreshTime}});
+                };
+                $("#print").click(function() {
+                    $.ajax("/_print").then(function() {
+                        setTimeout(pollZ, 100);
                     });
                 });
                 $("#shutdown").click(function() {
@@ -92,7 +89,7 @@
                     snooze = false;
                     $.post('/_setScale', {
                         scale: x
-                    }).then(updateDimensions);
+                    }).then(getZInfo);
                 });
                 exactScaleRadioButtons.change(function(x) {
                     if (snooze) return;
@@ -102,12 +99,12 @@
                     snooze = false;
                     $.post('/_setScale', {
                         scale: x
-                    }).then(updateDimensions);
+                    }).then(getZInfo);
                 });
                 unitRadioButtons.change(function(x) {
                     $.post('/_setUnits', {
                         units: x.target.value
-                    }).then(updateDimensions);
+                    }).then(getZInfo);
                 });
                 var chosenUnits = "{{units}}";
                 if (chosenUnits == "None") {
@@ -124,8 +121,7 @@
                 exactScaleRadioButtons.each(function(i, x) {
                     x.checked = (x.value == chosenScale);
                 });
-                getCurrentZ();
-                setInterval(getCurrentZ, {{refreshTime}});
+                pollZ();
             });
         </script>
     </head>
