@@ -1,6 +1,38 @@
 Firmware development
 ==
 
+Change of direction
+--
+Circumstances allow me only a couple more days of work on this project. This is a major
+simplification of things. Using a Raspberry Pi as a controller for the printer seemed like
+a great idea initially, giving the printer networking ability, a lot of autonomy, a
+capacity for complex behavior, etc.
+
+But the RPi brought a lot of problems with it. It's a pain to interact with. Maintaining a
+network is challenging if it's not near an Ethernet cable or a wifi router. When I slice a
+STL file on the RPi, it's very slow, and I was giving serious thought to refactoring
+`geom3d.py` and `stl.py` as C extensions to speed it up. Basically the RPi has been a drag
+on my development effort.
+
+The Python code for slicing STLs works fine on a laptop. My earlier scheme of using an
+Arduino to control the stepper motor also works fine, and requires only that the Arduino
+to be no more than a USB-cable-length away from the laptop. The laptop can drive the
+projector; I did this with the earlier prototype using a Macbook and while I'll be using
+a Linux laptop going forward it should still work fine.
+
+So here's the change of direction. Drive the projector directly from the Linux laptop, and
+use the Arduino controlled via USB-serial to move the stepper. The Raspberry Pi is gone.
+It's a big change, but it should make the next couple days much more productive.
+
+One other thing that will be changing is that the web UI is probably going to be replaced
+by a command line UI since it's on a laptop. I can probably still use a web server to run the
+projector, if my experience on the Macbook is an indication. The laptop has Linux Mint
+installed (and if I switch, it will be to some other Ubuntu flavor) so this seems relevant:
+
+* http://www.ubuntubuzz.com/2011/12/how-to-dual-monitor-setup-on-xfce.html
+
+Previously
+--
 Figure out how to document the Python code in a way that a PDF can be extracted easily. Provide profuse
 comments explaining everything in detail. Give [Sphinx](http://sphinx-doc.org/tutorial.html) a try.
 
