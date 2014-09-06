@@ -21,8 +21,8 @@ _unitScale = _scale = 1.0
 
 logger = config.get_logger('PRINTER')
 
-_projector = None
-_stepper = None
+projector = None
+stepper = None
 
 env = Environment(loader=PackageLoader('printer', '.'))
 
@@ -70,22 +70,19 @@ class UserInterface(object):
         pass
 
     def _motorUp(self):
-        if _filename is not None:
-            return
-        logger.debug("motor up")
-        _stepper.start(True)
+        if not _printing:
+            logger.debug("motor up")
+            stepper.start(True)
 
     def _motorDown(self):
-        if _filename is not None:
-            return
-        logger.debug("motor down")
-        _stepper.start(False)
+        if not _printing:
+            logger.debug("motor down")
+            stepper.start(False)
 
     def _motorStop(self):
-        if _filename is not None:
-            return
-        logger.debug("motor stop")
-        _stepper.stop()
+        if not _printing:
+            logger.debug("motor stop")
+            stepper.stop()
 
     def _getZInfo(self):
         global _stl, _originalStl, _stlDirty
@@ -177,8 +174,8 @@ class ServerUI(UserInterface):
 
     @cherrypy.expose
     def shutdown(self):
-        _projector.shutdown()
-        _stepper.shutdown()
+        projector.shutdown()
+        stepper.shutdown()
         os.system('killall -KILL fbi')
         os.system('killall -KILL python')
         return 'bye\n'
@@ -227,7 +224,7 @@ class ServerUI(UserInterface):
         global _filename
         _filename = "my_ip_addr.png"
         os.system("./gen_ipaddr_image.sh")
-        _projector.project(_filename, 5000)
+        projector.project(_filename, 5000)
         return 'ok\n'
 
     @cherrypy.expose
@@ -320,28 +317,30 @@ def print_run():
         i += 1
         make_slice(_stl, _currentZ, 'static/' + fn, 'static/' + th)
         _slices.append(SliceData(fn, th, _currentZ))
-        _projector.project(fn, config.EXPOSURETIME)
+        projector.project(fn, config.EXPOSURETIME)
         # move down
-        _stepper.move(-config.STEPS_PER_INCH * config.SLICE_THICKNESS)
+        stepper.move(-config.STEPS_PER_INCH * config.SLICE_THICKNESS)
         _currentZ += config.SLICE_THICKNESS * config.ZSCALE / _unitScale
     _filename = _originalStl = _stl = None
     _printing = False
 
 
+import macbook   # noqa
+import rpi    # noqa
+klass = config.lookup(globals(), config.UI)
+if klass:
+    ui = klass()
+klass = config.lookup(globals(), config.PROJECTOR)
+if klass:
+    projector = klass()
+    ps = projector.getServer()
+    if ps:
+        ui.projector = ps
+klass = config.lookup(globals(), config.STEPPER)
+if klass:
+    stepper = klass()
+logger.debug("Stepper: {0}\nProjector: {1}".format(stepper, projector))
+
+
 if __name__ == "__main__":
-    import macbook   # noqa
-    import rpi    # noqa
-    klass = config.lookup(globals(), config.UI)
-    if klass:
-        ui = klass()
-    klass = config.lookup(globals(), config.PROJECTOR)
-    if klass:
-        _projector = klass()
-        ps = _projector.getServer()
-        if ps:
-            ui.projector = ps
-    klass = config.lookup(globals(), config.STEPPER)
-    if klass:
-        _stepper = klass()
-    logger.debug("Stepper: {0}\nProjector: {1}".format(_stepper, _projector))
     ui.start()
