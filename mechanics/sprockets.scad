@@ -1,35 +1,21 @@
 /* http://www.thingiverse.com/thing:426854 */
 
 module sprocket_tooth() {
-    difference() {
-        union() {
+    s = 1;
+    intersection() {
+        difference() {
             translate([-1/4,0,-1/16])
                 cube([1/2,3/8,1/8]);
-            intersection() {
-                translate([1/4, 0, -1/16])
-                    cylinder(h=1/8, d=1-5/16, $fn=30);
-                translate([-1/4, 0, -1/16])
-                    cylinder(h=1/8, d=1-5/16, $fn=30);
-            }
+            translate([1/4, 0, -1/8])
+                cylinder(h=1/4, d=5/16, $fn=30);
+            translate([-1/4, 0, -1/8])
+                cylinder(h=1/4, d=5/16, $fn=30);
         }
-        translate([1/4, 0, -1/8])
-            cylinder(h=1/4, d=5/16, $fn=30);
-        translate([-1/4, 0, -1/8])
-            cylinder(h=1/4, d=5/16, $fn=30);
-        multmatrix(m = [
-            [1, 0, 0, -0.5],
-            [0, 1, 4, -1.3],
-            [0, 0, 1, 0],
-            [0, 0, 0, 1]
-        ])
-            cube([1, 1, 1]);
-        multmatrix(m = [
-            [1, 0, 0, -0.5],
-            [0, 1, -4, 2.7],
-            [0, 0, 1, -1],
-            [0, 0, 0, 1]
-        ])
-            cube([1, 1, 1]);
+        translate([0, -0.05, 0])
+            scale([1, 1, 0.5])
+                rotate([-45, 0, 0])
+                    translate([-1/2, 0, 0])
+                        cube([1, 1, 1]);
     }
 }
 
