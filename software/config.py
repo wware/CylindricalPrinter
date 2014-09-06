@@ -47,7 +47,7 @@ EXPOSURETIME = 60000    # milliseconds
 # to millimeters, we'll see if I do that.
 SLICE_THICKNESS = 0.01
 
-MOCK_ARDUINO = True
+MOCK_ARDUINO = False
 
 # default values
 UI = 'UserInterface'
@@ -57,10 +57,10 @@ STEPPER = 'NullStepper'
 UI = 'ServerUI'
 
 # PROJECTOR = 'macbook.Projector'
-# STEPPER = 'macbook.Stepper'
+STEPPER = 'macbook.Stepper'
 
-PROJECTOR = 'rpi.Projector'
-STEPPER = 'rpi.Stepper'
+# PROJECTOR = 'rpi.Projector'
+# STEPPER = 'rpi.Stepper'
 
 
 def get(attr, globals=globals()):

@@ -44,7 +44,7 @@ void initialize_wait_time(long steps) {
     }
 }
 
-void update_wait_time(steps) {
+void update_wait_time(long steps) {
     if (steps > end_stepup) {
         current_wait -= DELAY_INCREMENT;
     }
@@ -67,8 +67,10 @@ void loop() {
     if (Serial.available()) {
         c = (char)Serial.read();
         if (!moving) {
-            buf[bufptr++] = c = (char)Serial.read();
-            if (c == '\n') {
+            buf[bufptr++] = c;
+            switch (c) {
+            case '\n':
+                buf[--bufptr] == '\0';
                 steps = atol(buf);
                 if (steps < 0) {
                     digitalWrite(DIRECTION, HIGH);
@@ -85,37 +87,44 @@ void loop() {
                 }
                 Serial.println("OK");
                 bufptr = 0;
-            }
-            else if (c == 'P') {
+                break;
+            case 'P':
                 digitalWrite(DIRECTION, LOW);
                 current_wait = STEPPER_MOTOR_MAX_TIME;
                 moving = 1;
-            }
-            else if (c == 'N') {
+                bufptr = 0;
+                break;
+            case 'N':
                 digitalWrite(DIRECTION, HIGH);
                 current_wait = STEPPER_MOTOR_MAX_TIME;
                 moving = 1;
+                bufptr = 0;
+                break;
             }
         }
         else if (c == 'S') {
             moving = 2;
-            bufptr = 0;
         }
     }
 
-    if (moving) {
+    switch (moving) {
+      case 0:
+        // we're stopped, do nothing
+        break;
+      case 1:
         one_step();
-        switch (moving) {
-            case 1:
-                if (current_wait > STEPPER_MOTOR_MIN_TIME)
-                    current_wait -= DELAY_INCREMENT;
-                break;
-            default:
-                if (current_wait < STEPPER_MOTOR_MAX_TIME)
-                    current_wait += DELAY_INCREMENT;
-                else:
-                    moving = 0;
-                break;
-        }
+        // if not at max speed, accelerate
+        if (current_wait > STEPPER_MOTOR_MIN_TIME)
+            current_wait -= DELAY_INCREMENT;
+        break;
+      case 2:
+        one_step();
+        // if not at min speed, decelerate
+        if (current_wait < STEPPER_MOTOR_MAX_TIME)
+            current_wait += DELAY_INCREMENT;
+        else
+            // when deceleration complete, stop moving
+            moving = 0;
+        break;
     }
 }
