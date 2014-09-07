@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 import config
 logger = config.get_logger('GEOM3D')
 

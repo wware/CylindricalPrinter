@@ -10,7 +10,10 @@ os.system('mkdir -p ' + MODELS_DIR)
 # * Port number, directories
 
 SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 80
+SERVER_PORT = 8080
+
+# Where to find the Arduino
+SERIAL_PORT = '/dev/tty.usbmodem1421'
 
 # When we use red, we can see the image on the resin but the resin
 # doesn't get cured. Helpful for alignment, focusing, calibration, etc.
@@ -24,9 +27,11 @@ STEPPER_POLARITY = True
 # like about a millisecond.
 STEPPER_TIME = 0.001
 
+HYSTERESIS_STEPS = 1000
+
 # One rotation of the nut for the threaded rod is 200 steps. One Z inch is
-# 200 * 20 because the threaded rods are 1/4"-20.
-STEPS_PER_INCH = 4000
+# 200 * 20 because the threaded rods are 1/4"-20. A slice is 0.01 inches.
+STEPS_PER_SLICE = 40
 
 # To see fewer thumbnails in the home page, make this number bigger. If you
 # want to see every thumbnail, set this to 1.
@@ -48,19 +53,6 @@ EXPOSURETIME = 60000    # milliseconds
 SLICE_THICKNESS = 0.01
 
 MOCK_ARDUINO = False
-
-# default values
-UI = 'UserInterface'
-PROJECTOR = 'NullProjector'
-STEPPER = 'NullStepper'
-
-UI = 'ServerUI'
-
-# PROJECTOR = 'macbook.Projector'
-STEPPER = 'macbook.Stepper'
-
-# PROJECTOR = 'rpi.Projector'
-# STEPPER = 'rpi.Stepper'
 
 
 def get(attr, globals=globals()):
