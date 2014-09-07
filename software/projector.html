@@ -14,7 +14,7 @@ $(function() {
     var previousStamp = null;
     var pingServer = function() {
         var refreshIntervalId = setInterval(function() {
-            $.ajax('/projector/info').success(
+            $.ajax('/info').success(
                 function(value) {
                     if (value === 'NOPE') {
                         return;
@@ -31,11 +31,11 @@ $(function() {
                     }
                     clearInterval(refreshIntervalId);
                     previousStamp = stamp;
-                    $('#myimage').attr('src', '/projector/image');
+                    $('#myimage').attr('src', '/image');
                     $('#myimage').attr('style', 'display: block;');
                     setTimeout(function() {
                         $('#myimage').attr('style', 'display: none;');
-                        $.ajax('/projector/finished');
+                        $.ajax('/finished');
                         pingServer();
                     }, milliseconds);
                 }

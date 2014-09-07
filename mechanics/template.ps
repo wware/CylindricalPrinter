@@ -112,7 +112,7 @@
 % outer radius of the main support
 /outerR 7.5 inch def
 % radius for stepper outrigger
-/stepperOutrigger 10 inch def
+/stepperOutrigger 10.5 inch def
 
 /onepage {
     reducedBy 1 ne {
@@ -123,7 +123,7 @@
     } if
 
     /stepperSprocket_xy {
-        XC stepperOutrigger add 1.5 inch sub YC 240 RC
+        XC stepperOutrigger add 2 inch sub YC 240 RC
     } def
     /sprocket1_xy {
         XC R add YC   60 RC
@@ -134,14 +134,6 @@
     /sprocket3_xy {
         XC R add YC  300 RC
     } def
-
-    %% arrow pointing at the projector, to stay oriented
-    XC 1 inch sub YC 0.25 inch add  MT  (Projector) show
-    XC 2 inch sub YC  MT
-    XC 2 inch add YC  LT
-    -1 inch -0.5 inch RLT
-    1  inch  0.5 inch RLT
-    -1 inch  0.5 inch RLT
 
     %% Wingnut bolts that hold the thing on the bucket
     XC 6.25 inch add YC  45 RC point
@@ -160,16 +152,6 @@
 
     %% main support, inner radius
     XC YC innerR 0 360 arc S
-
-    %% main support, mirror mount holes
-    XC 1 inch add YC 6.5 inch add point
-    XC 1 inch sub YC 6.5 inch add point
-    XC 1 inch add YC 6.5 inch sub point
-    XC 1 inch sub YC 4.5 inch sub point
-
-    %% mirror mount outline
-    XC 1.5 inch sub YC 7 inch add
-    XC 1.5 inch add YC 7 inch sub rectangle
 
     %% build plate
     XC YC BPR 0 360 arc S
@@ -204,16 +186,18 @@
     XC YC outerR 240 theta2 add 360 arc S
 
     %% the pivot hole for the stepper plate
-    XC stepperOutrigger add 1.5 inch sub YC 2.75 inch sub 240 RC point
+    XC stepperOutrigger add 2 inch sub YC 2.75 inch sub 240 RC point
 
     %% the circular tensioner track for the stepper plate
-    XC stepperOutrigger add 1.5 inch sub YC 2.75 inch add 240 RC point
-    XC stepperOutrigger add 1.5 inch sub YC 2.75 inch sub 240 RC
+    XC stepperOutrigger add 2 inch sub YC 2.75 inch add 240 RC point
+    XC stepperOutrigger add 2 inch sub YC 2.75 inch sub 240 RC
     % 5.5 plus or minus 0.125, 5.5 comes from distance between pivot and track
-    2 copy 5.375 inch 315 345 arc
-    2 copy 5.625 inch 345 315 arcn
-    %2 copy 5.375 inch 315 345 arc S
-    5.375 inch 315 345 arc S
+    2 copy 5.375 inch 320 350 arc
+    2 copy 5.625 inch 350 320 arcn
+    5.375 inch 320 350 arc S
+%    2 copy 5.375 inch 325 350 arc
+%    2 copy 5.625 inch 350 325 arcn
+%    5.375 inch 325 350 arc S
 
     /stepperPlate {    % x y theta ->
         3 dict begin

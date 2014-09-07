@@ -70,13 +70,14 @@ void loop() {
             buf[bufptr++] = c;
             switch (c) {
             case '\n':
+                // positive numbers go up, negative down
                 buf[--bufptr] == '\0';
                 steps = atol(buf);
                 if (steps < 0) {
-                    digitalWrite(DIRECTION, HIGH);
+                    digitalWrite(DIRECTION, LOW);
                     steps = -steps;
                 } else {
-                    digitalWrite(DIRECTION, LOW);
+                    digitalWrite(DIRECTION, HIGH);
                 }
 
                 initialize_wait_time(steps);
@@ -89,13 +90,15 @@ void loop() {
                 bufptr = 0;
                 break;
             case 'P':
-                digitalWrite(DIRECTION, LOW);
+                // up
+                digitalWrite(DIRECTION, HIGH);
                 current_wait = STEPPER_MOTOR_MAX_TIME;
                 moving = 1;
                 bufptr = 0;
                 break;
             case 'N':
-                digitalWrite(DIRECTION, HIGH);
+                // down
+                digitalWrite(DIRECTION, LOW);
                 current_wait = STEPPER_MOTOR_MAX_TIME;
                 moving = 1;
                 bufptr = 0;

@@ -8,11 +8,12 @@ from printer import start_projector, stop_projector, UserInterface
 os.system('mkdir -p static')
 
 start_projector()
+time.sleep(5)
 
-ui = UserInterface()
-
-time.sleep(2)
-ui.motorMove(200)
-time.sleep(2)
+if True:
+    ui = UserInterface()
+    ui.setModel('models/dodecahedron.stl')
+    ui.setScale(0.4)
+    ui.Print()
 
 stop_projector()

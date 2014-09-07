@@ -12,7 +12,7 @@ module dodec() {
 				}
 }
 
-D = 110;
+D = 115;
 
 for (i = [0 : 1])
 	for (j = [0 : 1])

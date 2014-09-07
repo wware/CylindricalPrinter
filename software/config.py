@@ -13,46 +13,30 @@ SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8080
 
 # Where to find the Arduino
-SERIAL_PORT = '/dev/tty.usbmodem1421'
+SERIAL_PORT = '/dev/tty.usbmodem1411'
 
-# When we use red, we can see the image on the resin but the resin
-# doesn't get cured. Helpful for alignment, focusing, calibration, etc.
-USE_RED = True
+# Mock out the Arduino, set the exposure time really quick, and project red
+# images to avoid curing the resin.
+PRACTICE_MODE = False
 
-# In case I forget which way I wired the stepper, I have a config bit for
-# reversing it without soldering.
-STEPPER_POLARITY = True
-
-# How many seconds between level transitions does the stepper need? Looks
-# like about a millisecond.
-STEPPER_TIME = 0.001
-
-HYSTERESIS_STEPS = 1000
+HYSTERESIS_STEPS = 400
 
 # One rotation of the nut for the threaded rod is 200 steps. One Z inch is
 # 200 * 20 because the threaded rods are 1/4"-20. A slice is 0.01 inches.
 STEPS_PER_SLICE = 40
-
-# To see fewer thumbnails in the home page, make this number bigger. If you
-# want to see every thumbnail, set this to 1.
-THUMBNAIL_MODULO = 10
 
 # This is the XY scale factor, increasing this number makes the projected
 # shape smaller linearly. This number of STL units in the X and Y direction
 # maps to one projector screen width.
 XYSCALE = 230
 
-# How many STL units in the Z direction make one inch.
-ZSCALE = 40
+if PRACTICE_MODE:
+    EXPOSURETIME = 1000
+else:
+    EXPOSURETIME = 60000    # milliseconds
 
-EXPOSURETIME = 60000    # milliseconds
-# EXPOSURETIME = 3000
-
-# This is in inches, because of STEPS_PER_INCH. I should probably move it all
-# to millimeters, we'll see if I do that.
-SLICE_THICKNESS = 0.01
-
-MOCK_ARDUINO = False
+# This is in millimeters, a hundredth of an inch.
+SLICE_THICKNESS = 0.254
 
 
 def get(attr, globals=globals()):
