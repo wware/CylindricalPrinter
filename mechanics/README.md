@@ -8,14 +8,28 @@ tolerances, hopefully none more exacting than 1/16", and most of them much
 less exacting. Wherever possible I've used the commonest, cheapest, most
 widely-available parts I could find.
 
-Just so you know what you're trying to build, here is a picture. The orange
-thing is a five-gallon bucket from Home Depot.
+There are pictures of the printer in the gallery directory, to help you
+get a better idea what you're putting together.
 
-![One picture of the printer](https://raw.githubusercontent.com/wware/CylindricalPrinter/master/mechanics/printer_1.png)
+Shopping list
+--
 
-![Another picture of the printer](https://raw.githubusercontent.com/wware/CylindricalPrinter/master/mechanics/printer_2.png)
-
-![A real picture of the printer](https://raw.githubusercontent.com/wware/CylindricalPrinter/master/mechanics/RealPrinterPhoto.png)
+* Get lots and lots of 1/4-20 hardware: nuts, lock washers, nylon washers,
+  spacers, bolts of different lengths. Buy boxes of this stuff if you can.
+* 1/4-20 threaded rod (Home Depot): 3 two-foot lengths to move the build
+  platform up and down, one more two-foot length to help support the weight
+  of the stepper motor
+* A few 1/4" long 4-40 machine screws, which are the set screw for the stepper
+  sprocket.
+* One stepper sprocket, available either from
+  [my Shapeways store](https://www.shapeways.com/shops/wills-3d-stuff) or you
+  can print one yourself from the design file on
+  [Thingiverse](http://www.thingiverse.com/thing:426854).
+* A length of 1/2"-1/8" single speed bicycle chain, about ten bucks at your
+  local bike shop.
+* Also pick up a chain tool like
+  [this](http://www.atomiczombie.com/tutorials/Bike%20Chain%20Basics/Figure%203.jpg),
+  also about ten bucks.
 
 Sprockets and bike chain
 --
