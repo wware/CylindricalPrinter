@@ -10,8 +10,8 @@
 #define STEP 13
 
 // microseconds
-#define STEPPER_MOTOR_MIN_TIME   500
-#define STEPPER_MOTOR_MAX_TIME   1500
+#define STEPPER_MOTOR_MIN_TIME   5000
+#define STEPPER_MOTOR_MAX_TIME   5000
 #define DELAY_INCREMENT  10
 #define THRESHOLD \
     ((STEPPER_MOTOR_MAX_TIME - STEPPER_MOTOR_MIN_TIME) / DELAY_INCREMENT)
@@ -86,6 +86,10 @@ void loop() {
                     steps--;
                     update_wait_time(steps);
                 }
+                Serial.println("OK");
+                bufptr = 0;
+                break;
+            case 'A':
                 Serial.println("OK");
                 bufptr = 0;
                 break;

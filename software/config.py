@@ -19,11 +19,16 @@ SERIAL_PORT = '/dev/tty.usbmodem1411'
 # images to avoid curing the resin.
 PRACTICE_MODE = False
 
-HYSTERESIS_STEPS = 400
-
 # One rotation of the nut for the threaded rod is 200 steps. One Z inch is
 # 200 * 20 because the threaded rods are 1/4"-20. A slice is 0.01 inches.
-STEPS_PER_SLICE = 40
+STEPS_PER_INCH = 4000
+STEPS_PER_SLICE = int(0.01 * STEPS_PER_INCH)
+
+# The idea here is just to wet the top surface of the cured resin with
+# fresh uncured resin. No need to travel far.
+#HYSTERESIS_STEPS = 2 * STEPS_PER_SLICE
+HYSTERESIS_STEPS = 0
+POST_MOVE_SETTLING_TIME = 5   # seconds
 
 # This is the XY scale factor, increasing this number makes the projected
 # shape smaller linearly. This number of STL units in the X and Y direction

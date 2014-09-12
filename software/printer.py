@@ -252,12 +252,14 @@ class UserInterface(object):
             i += 1
             self.make_slice(self.stl, self.currentZ, fn)
             self.project(fn, config.EXPOSURETIME)
-            # move up
-            self.move(config.HYSTERESIS_STEPS)
-            time.sleep(0.5)
-            # move down a little further
+            # move down to wet the surface
             self.move(-(config.HYSTERESIS_STEPS +
                         config.STEPS_PER_SLICE))
+            time.sleep(config.POST_MOVE_SETTLING_TIME)
+            if config.HYSTERESIS_STEPS > 0:
+                # move up but not quite as far
+                self.move(config.HYSTERESIS_STEPS)
+            time.sleep(config.POST_MOVE_SETTLING_TIME)
             self.currentZ += config.SLICE_THICKNESS / self.unitScale
         self.filename = self.originalStl = self.stl = None
         self.printing = False

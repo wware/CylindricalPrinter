@@ -1,5 +1,5 @@
 // dimensions are in millimeters, half-inch-high supports
-H = 18;
+H = 25.4;
 
 module dodec() {
 	import("/Users/wware/CylindricalPrinter/software/models/Hollow_Dodecahedron.stl");
@@ -12,10 +12,4 @@ module dodec() {
 				}
 }
 
-D = 115;
-
-for (i = [0 : 1])
-	for (j = [0 : 1])
-		translate([(i-1/2) * D, (j-1/2) * D, 0]) {
-			dodec();
-}
+dodec();
