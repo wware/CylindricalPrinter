@@ -26,8 +26,7 @@ STEPS_PER_SLICE = int(0.01 * STEPS_PER_INCH)
 
 # The idea here is just to wet the top surface of the cured resin with
 # fresh uncured resin. No need to travel far.
-#HYSTERESIS_STEPS = 2 * STEPS_PER_SLICE
-HYSTERESIS_STEPS = 0
+HYSTERESIS_STEPS = 2 * STEPS_PER_SLICE
 POST_MOVE_SETTLING_TIME = 10   # seconds
 
 # This is the XY scale factor, increasing this number makes the projected
