@@ -255,7 +255,6 @@ class UserInterface(object):
             # move down to wet the surface
             self.move(-(config.HYSTERESIS_STEPS +
                         config.STEPS_PER_SLICE))
-            time.sleep(config.POST_MOVE_SETTLING_TIME)
             if config.HYSTERESIS_STEPS > 0:
                 # move up but not quite as far
                 self.move(config.HYSTERESIS_STEPS)
