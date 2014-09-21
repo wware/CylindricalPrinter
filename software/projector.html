@@ -4,8 +4,9 @@
     content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="-1" />
-<script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
-<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script>
+<!--script src="http://code.jquery.com/jquery-1.11.0.min.js"></script>
+<script src="http://code.jquery.com/jquery-migrate-1.2.1.min.js"></script-->
+<script src="/static/jquery.js"></script>
 </head>
 <body style="background-color: #000000;">
 <image id="myimage" style="display: none;"></image>
@@ -14,7 +15,8 @@ $(function() {
     var previousStamp = null;
     var pingServer = function() {
         var refreshIntervalId = setInterval(function() {
-            $.ajax('/info').success(
+            var x = $.ajax('/info');
+            x.done(
                 function(value) {
                     if (value === 'NOPE') {
                         return;
@@ -40,7 +42,7 @@ $(function() {
                     }, milliseconds);
                 }
             );
-        }, 1000);
+//        }, 1000);
     };
     pingServer();
 });
