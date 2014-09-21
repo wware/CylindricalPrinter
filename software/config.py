@@ -13,7 +13,7 @@ SERVER_HOST = '0.0.0.0'
 SERVER_PORT = 8080
 
 # Where to find the Arduino
-SERIAL_PORT = '/dev/tty.usbmodem1411'
+SERIAL_PORT = '/dev/tty.usbmodem1421'
 
 # Mock out the Arduino, set the exposure time really quick, and project red
 # images to avoid curing the resin.

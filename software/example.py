@@ -8,8 +8,8 @@ import config
 
 from printer import start_projector, stop_projector, UserInterface
 
-# MODEL = 'models/dodecahedron.stl'
-MODEL = 'models/smallish.stl'
+MODEL = 'models/dodecahedron.stl'
+# MODEL = 'models/smallish.stl'
 
 REAL = sys.argv[1:2] == ['real']
 
