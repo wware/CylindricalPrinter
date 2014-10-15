@@ -1,8 +1,8 @@
 import logging
 import os
 
-MODELS_DIR = os.getcwd() + '/models'
-os.system('mkdir -p ' + MODELS_DIR)
+STEPPER_POLARITY = True
+STEPPER_TIME = 0.001
 
 # Things that can go in here:
 # * Everything that is a constant in teststl.py

@@ -1,13 +1,9 @@
-import cherrypy
 import json
 import os
 import random
 import serial
 import threading
 import time
-
-from cherrypy import HTTPError
-from jinja2 import Environment, PackageLoader
 
 import config
 from geom3d import zeroVector
@@ -20,93 +16,6 @@ if config.PRACTICE_MODE:
     WHITE = RED
 
 logger = config.get_logger('PRINTER')
-
-
-class ProjectorState:
-    instance = None
-
-    def __init__(self, stamp, imagefile, duration, done):
-        self.stamp, self.imagefile, self.duration, self.done = \
-            stamp, imagefile, duration, done
-
-    @classmethod
-    def getInstance(cls):
-        if cls.instance is None:
-            cls.instance = ProjectorState(None, None, None, True)
-        return cls.instance
-
-    @classmethod
-    def setInstance(cls, stamp, imagefile, duration, done):
-        cls.instance = ProjectorState(stamp, imagefile, duration, done)
-
-
-class ProjectorServer(object):
-
-    def start(self):
-        _config = {
-            'global': {
-                'server.socket_host': config.SERVER_HOST,
-                'server.socket_port': config.SERVER_PORT
-            },
-            '/static': {
-                'tools.staticdir.on': True,
-                'tools.staticdir.dir': os.getcwd() + '/static'
-            }
-        }
-        cherrypy.quickstart(self, '/', config=_config)
-
-    @cherrypy.expose
-    def index(self):
-        env = Environment(loader=PackageLoader('printer', '.'))
-        template = env.get_template('projector.html')
-        return template.render()
-
-    @cherrypy.expose
-    def finished(self):
-        ProjectorState.getInstance().done = True
-
-    @cherrypy.expose
-    def image(self):
-        imagefile = ProjectorState.getInstance().imagefile
-        logger.debug('IMAGE ' + imagefile)
-        cherrypy.response.headers['Cache-Control'] = \
-            'no-cache, no-store, must-revalidate'
-        cherrypy.response.headers['Pragma'] = 'no-cache'
-        cherrypy.response.headers['Expires'] = '-1'
-        try:
-            return open(imagefile, 'r').read()
-        except Exception, e:
-            logger.debug(e)
-            raise HTTPError('404 Not Found')
-
-    @cherrypy.expose
-    def info(self):
-        pstate = ProjectorState.getInstance()
-        if pstate.stamp is None:
-            logger.debug('INFO NOPE')
-            return 'NOPE'
-        logger.debug('INFO ' + str(pstate.stamp) +
-                     ' ' + str(pstate.done))
-        return (str(pstate.stamp) + ' ' +
-                str(pstate.duration))
-
-
-def start_projector(thread=True):
-    def pstart():
-        ProjectorServer().start()
-
-    if thread:
-        # http://stackoverflow.com/questions/17191744
-        _thread = threading.Thread(target=pstart)
-        _thread.setDaemon(True)
-        _thread.start()
-    else:
-        pstart()
-
-
-def stop_projector():
-    from cherrypy import process
-    process.bus.exit()
 
 
 class UserInterface(object):
