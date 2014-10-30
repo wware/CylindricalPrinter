@@ -1,5 +1,4 @@
 import logging
-import os
 
 STEPPER_POLARITY = True
 STEPPER_TIME = 0.001

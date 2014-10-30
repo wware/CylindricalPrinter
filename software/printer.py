@@ -1,9 +1,5 @@
-import json
 import os
-import random
 import serial
-import threading
-import time
 
 import config
 from geom3d import zeroVector
@@ -109,14 +105,14 @@ class UserInterface(object):
 
     def project(self, filename, milliseconds):
         logger.debug('project ' + filename + ' ' + str(milliseconds))
-        ProjectorState.setInstance(
-            random.randint(1, 1000000000),
-            filename,
-            int(milliseconds),
-            False
-        )
-        while not ProjectorState.getInstance().done:
-            time.sleep(0.5)
+        # ProjectorState.setInstance(
+        #     random.randint(1, 1000000000),
+        #     filename,
+        #     int(milliseconds),
+        #     False
+        # )
+        # while not ProjectorState.getInstance().done:
+        #     time.sleep(0.5)
 
     def make_slice(self, stl, z, imagefile):
         bb = stl._bbox
@@ -141,6 +137,10 @@ class UserInterface(object):
                   '-depth 8 /tmp/foo.rgb ' + imagefile)
 
     def Print(self):
+        from utils import hack_slice
+        return self.slices(hack_slice)
+
+    def slices(self, hack_slice=None):
         if self.printing or self.originalStl is None:
             self.printing = False
             return
@@ -160,14 +160,9 @@ class UserInterface(object):
             fn = 'images/foo%04d.png' % i
             i += 1
             self.make_slice(self.stl, self.currentZ, fn)
-            self.project(fn, config.EXPOSURETIME)
-            # move down to wet the surface
-            self.move(-(config.HYSTERESIS_STEPS +
-                        config.STEPS_PER_SLICE))
-            if config.HYSTERESIS_STEPS > 0:
-                # move up but not quite as far
-                self.move(config.HYSTERESIS_STEPS)
-            time.sleep(config.POST_MOVE_SETTLING_TIME)
+            if hack_slice is not None:
+                hack_slice(fn)
             self.currentZ += config.SLICE_THICKNESS / self.unitScale
         self.filename = self.originalStl = self.stl = None
         self.printing = False
+        return i

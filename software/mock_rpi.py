@@ -10,7 +10,7 @@ def doc(name, args):
 
 
 for name in ('setmode', 'setup', 'output', 'input', 'cleanup',
-			 'wait_for_edge', 'add_event_detect', 'remove_event_detect'):
+             'wait_for_edge', 'add_event_detect', 'remove_event_detect'):
     globals()[name] = lambda *args: doc(name, args)
 
 
