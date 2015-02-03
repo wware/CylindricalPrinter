@@ -3,4 +3,4 @@
 cd /home/root
 echo "Starting cylindrical printer at $(date)" > T.txt
 cd CylindricalPrinter/software
-exec python rpi.py
+exec python2.7 rpi.py
