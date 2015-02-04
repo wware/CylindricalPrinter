@@ -18,13 +18,14 @@ STEPS_PER_SLICE = int(0.01 * STEPS_PER_INCH)
 HYSTERESIS_STEPS = 2 * STEPS_PER_SLICE
 POST_MOVE_SETTLING_TIME = 10   # seconds
 
-# This is the XY scale factor, increasing this number makes the projected
-# shape smaller linearly. This number of STL units in the X and Y direction
-# maps to one projector screen width. The best way to calibrate is to print
-# with test objects with known dimensions, and measure the results with a
-# micrometer. NOTE - this number will vary with the height of liquid in the
-# bucket, as will the focus setting of the projector!
-XYSCALE = 244
+# Increasing these numbers makes the projected shape smaller linearly.
+# This number of STL units in the X and Y direction maps to one projector
+# screen width. The best way to calibrate is to print test objects with
+# known dimensions, and measure the results with a micrometer.
+# NOTE - this number will vary with the height of liquid in the bucket,
+# as will the focus setting of the projector!
+XSCALE = 244
+YSCALE = XSCALE      # assume square pixels
 
 EXPOSURETIME = 60000    # milliseconds
 

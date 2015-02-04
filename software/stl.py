@@ -1,3 +1,4 @@
+import os
 import re
 import string
 import struct
@@ -7,6 +8,8 @@ from geom3d import Triangle, BBox, Vector, BinaryTree
 
 import config
 logger = config.get_logger('STL')
+
+BLACK, RED, WHITE = '\x00\x00\x00', '\xff\x00\x00', '\xff\xff\xff'
 
 
 class Stl:
@@ -133,7 +136,9 @@ class Stl:
                 if tri._bbox.z_overlap(z0, z1):
                     self._zmap[i].append(tri)
 
-    def get_point_list(self, y, z, ztriangles):
+    def get_point_list(self, y, z, ztriangles=None):
+        if ztriangles is None:
+            ztriangles = self.triangles
         xs = BinaryTree(lambda intersection: intersection[0].x)
         for triangle in ztriangles:
             if triangle._bbox.contains_yz(y, z):
@@ -158,3 +163,46 @@ class Stl:
                         pixel_off_callback(i - h)
                 h = i
             pixel_off_callback(n - h)
+
+    def make_slice(self, z, imagefile):
+        W, H = 1024, 768    # projector resolution
+        assert W >= H       # projector must be landscape mode
+        bb = self._bbox
+        xmin, xmax = bb._min.x, bb._max.x
+        ymin, ymax = bb._min.y, bb._max.y
+        x0 = (xmax + xmin) / 2 - 0.5 * config.XSCALE
+        y0 = (ymax + ymin) / 2 - 0.5 * config.YSCALE
+        outf = open('/tmp/foo.rgb', 'w')
+
+        def pixel_on_callback(n, outf=outf):
+            outf.write(n * WHITE)
+
+        def pixel_off_callback(n, outf=outf):
+            outf.write(n * BLACK)
+        self.make_layer(
+            z,
+            [(1. * i / (W - 1)) * config.XSCALE + x0
+             for i in range(W)],
+            [((i + 0.5 * (W - H)) / (W - 1)) * config.YSCALE + y0
+             for i in range(H)],
+            pixel_on_callback,
+            pixel_off_callback)
+        outf.close()
+        os.system('convert -size {}x{} -alpha off -depth 8 /tmp/foo.rgb {}'
+                  .format(W, H, imagefile))
+
+    def slices(self, hack_slice=None):
+        os.system('rm -rf images')
+        os.system('mkdir -p images')
+        zmin = self._bbox._min.z
+        zmax = self._bbox._max.z
+        currentZ = zmin + 0.0001
+        i = 0
+        while currentZ < zmax - 0.0001:
+            fn = 'images/foo%04d.png' % i
+            i += 1
+            self.make_slice(currentZ, fn)
+            if hack_slice is not None:
+                hack_slice(fn)
+            currentZ += config.SLICE_THICKNESS
+        return i
