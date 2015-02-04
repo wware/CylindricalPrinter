@@ -8,16 +8,6 @@ STEPPER_TIME = 0.001
 # * Log level for various components
 # * Port number, directories
 
-SERVER_HOST = '0.0.0.0'
-SERVER_PORT = 8080
-
-# Where to find the Arduino
-SERIAL_PORT = '/dev/tty.usbmodem1421'
-
-# Mock out the Arduino, set the exposure time really quick, and project red
-# images to avoid curing the resin.
-PRACTICE_MODE = False
-
 # One rotation of the nut for the threaded rod is 200 steps. One Z inch is
 # 200 * 20 because the threaded rods are 1/4"-20. A slice is 0.01 inches.
 STEPS_PER_INCH = 4000
@@ -36,10 +26,7 @@ POST_MOVE_SETTLING_TIME = 10   # seconds
 # bucket, as will the focus setting of the projector!
 XYSCALE = 244
 
-if PRACTICE_MODE:
-    EXPOSURETIME = 1000
-else:
-    EXPOSURETIME = 60000    # milliseconds
+EXPOSURETIME = 60000    # milliseconds
 
 # This is in millimeters, a hundredth of an inch. It's millimeters because all
 # the STL dimensions in printer.py are in millimeters, the de-facto standard
