@@ -52,7 +52,7 @@ else:
 
 logger = config.get_logger('RPI')
 
-FBI = "/usr/local/bin/fbi"
+FBI = "/usr/bin/fbi"
 
 # http://elinux.org/RPi_Low-level_peripherals#Python
 # PULSE is the pulses input of the stepper controller

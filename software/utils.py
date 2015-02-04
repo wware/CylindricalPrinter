@@ -4,7 +4,7 @@ import config
 
 logger = config.get_logger('RPI')
 
-FBI = "/usr/local/bin/fbi"
+FBI = "/usr/bin/fbi"
 
 # This should make it obvious that we want to normalize the config
 # stuff between metadata.py on the USB stick and config.py in the
