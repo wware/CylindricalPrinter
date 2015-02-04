@@ -41,7 +41,7 @@ class TestStl(object):
         assert approximate(v.y, -9)
         assert approximate(v.z, 0)
 
-    def te_st_get_point_list(self):
+    def test_get_point_list(self):
         A = Vector(0, 0, 0)
         B = Vector(1, 0, 0)
         C = Vector(0, 1, 0)
@@ -60,9 +60,9 @@ class TestStl(object):
         assert approximate(J.y, 0.25)
         assert approximate(J.z, 0.25)
 
-        assert stl.get_point_list(2, 2) == []
-        assert stl.get_point_list(1, 1) == []
-        (I, _), = stl.get_point_list(0.5, 0.5)
+        assert stl.get_point_list(2, 2, tz) == []
+        assert stl.get_point_list(1, 1, tz) == []
+        (I, _), = stl.get_point_list(0.5, 0.5, tz)
         assert approximate(I.x, 0)
         assert approximate(I.y, 0.5)
         assert approximate(I.z, 0.5)
