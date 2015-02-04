@@ -1,5 +1,8 @@
 from geom3d import Vector, Triangle
 from stl import Stl
+from mock import patch, call, MagicMock
+import config
+logger = config.get_logger('TEST_STL')
 
 
 def approximate(x, y):
@@ -50,9 +53,8 @@ class TestStl(object):
                   Triangle(A, C, B),
                   Triangle(A, D, C),
                   Triangle(B, C, D))
-        tz = stl.triangles
 
-        (I, _), (J, _) = stl.get_point_list(0.25, 0.25, tz)
+        (I, _), (J, _) = stl.get_point_list(0.25, 0.25)
         assert approximate(I.x, 0)
         assert approximate(I.y, 0.25)
         assert approximate(I.z, 0.25)
@@ -60,9 +62,53 @@ class TestStl(object):
         assert approximate(J.y, 0.25)
         assert approximate(J.z, 0.25)
 
-        assert stl.get_point_list(2, 2, tz) == []
-        assert stl.get_point_list(1, 1, tz) == []
-        (I, _), = stl.get_point_list(0.5, 0.5, tz)
+        assert stl.get_point_list(2, 2) == []
+        assert stl.get_point_list(1, 1) == []
+        (I, _), = stl.get_point_list(0.5, 0.5)
         assert approximate(I.x, 0)
         assert approximate(I.y, 0.5)
         assert approximate(I.z, 0.5)
+
+    def test_stl_from_file(self):
+        import stl
+        _stl = Stl("tests/wedge.stl")
+        (I, _), (J, _) = _stl.get_point_list(5, 5)
+        assert approximate(I.x, 5)
+        assert approximate(I.y, 5)
+        assert approximate(I.z, 5)
+        assert approximate(J.x, 10)
+        assert approximate(J.y, 5)
+        assert approximate(J.z, 5)
+
+        with patch.object(stl, 'os') as mock_os:
+            with patch.object(stl, 'open', create=True) \
+            as mock_open:  # NOQA
+                mock_open.return_value = m = MagicMock()
+                _stl.make_slice(5, 'quux.png')
+                mock_open.assert_called_with("/tmp/foo.rgb", "w")
+                for i in range(384):
+                    assert m.write.mock_calls[i] == call(3072 * "\x00")
+                # the first line with any actual content
+                assert m.write.mock_calls[384] == call(1536 * "\x00")
+                assert m.write.mock_calls[385] == call(60 * "\xff")
+                assert m.write.mock_calls[386] == call(1476 * "\x00")
+                m.close.assert_called_with()
+                mock_os.system.assert_called_with(
+                    "convert -size 1024x768 -alpha off " +
+                    "-depth 8 /tmp/foo.rgb quux.png")
+
+        with patch.object(stl, 'os') as mock_os:
+            with patch.object(stl, 'open', create=True) \
+            as mock_open:  # NOQA
+                _stl.slices()
+                assert len(mock_open.mock_calls) == 32459
+                assert mock_os.system.mock_calls[0] == call("rm -rf images")
+                assert mock_os.system.mock_calls[1] == call("mkdir -p images")
+                for i in range(40):
+                    assert mock_os.system.mock_calls[i + 2] == \
+                        call(("convert -size 1024x768 -alpha off -depth 8 " +
+                              "/tmp/foo.rgb images/foo{:04}.png").format(i))
+
+
+if __name__ == '__main__':
+    TestStl().test_stl_from_file()
