@@ -1,0 +1,25 @@
+SUMMARY = "Cylindrical Printer"
+
+SRC_URI = "git://github.com/wware/CylindricalPrinter.git;protocol=http;branch=__BRANCH"
+
+S = "${WORKDIR}/git"
+
+LICENSE = "PD"
+LIC_FILES_CHKSUM = "file://${S}/README.md;md5=251f3fc27808ffe31b34a96ec2a5b46c"
+
+RDEPENDS_${PN} = "bash python python-logging rpi-gpio fbida"
+
+__G10
+SRCREV = "__SRCREV"
+
+FILES_${PN} += "/home/root/CylindricalPrinter/* /etc/init.d/rcS /mnt/usbstick/.placeholder"
+
+do_install() {
+    install -m 0755 -d ${D}/home/root/CylindricalPrinter
+    install -m 0755 -d ${D}/etc/rc5.d
+    install -m 0755 -d ${D}/mnt/usbstick
+    cp -R ${S}/* ${D}/home/root/CylindricalPrinter
+    cp -R ${S}/S80cylpri.sh ${D}/etc/rc5.d
+    cp -R ${S}/software/etc_fstab ${D}/etc/fstab
+    touch ${D}/mnt/usbstick/.placeholder
+}
